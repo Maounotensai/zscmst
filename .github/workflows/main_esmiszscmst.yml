@@ -54,4 +54,4 @@ jobs:
           app-name: 'esmiszscmst'
           slot-name: 'production'
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_58e5a4b3f7a844718366b55a64d62fa4 }}
-          package: .
+          package: ./zscmst/blob/main/templates/Pages/login.php
