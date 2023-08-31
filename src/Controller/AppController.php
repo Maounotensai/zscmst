@@ -110,7 +110,7 @@ class AppController extends Controller
 
       // }
 
-      $this->viewBuilder()->setHelpers(['Access']);
+      // $this->viewBuilder()->setHelpers(['Access']);
 
       $this->viewBuilder()->setLayout('login');
 
