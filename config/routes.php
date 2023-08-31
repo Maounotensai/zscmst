@@ -41,10 +41,9 @@
 
 	  });
 
-$routes->prefix('api', function (RouteBuilder $routes) {
+    $routes->prefix('api', function (RouteBuilder $routes) {
 	     
       $routes->connect('/select', ['controller' => 'Select']);
-
 
       //sir raymond
       $routes->resources('Buildings');
