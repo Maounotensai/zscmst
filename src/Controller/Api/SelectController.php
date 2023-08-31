@@ -54,9 +54,13 @@ class SelectController extends AppController {
 
     $this->loadModel("CollegePrograms");
 
+    $this->loadModel("CollegeProgramCourses");
+
     $this->loadModel("RequestForms");
 
     $this->loadModel("Completions");
+
+    $this->loadModel("Dentals");
 
     $this->loadModel("ScholarshipApplications");
 
@@ -158,6 +162,10 @@ class SelectController extends AppController {
     $this->loadModel("Schools");
 
     $this->loadModel("Provinces");
+
+    $this->loadModel("Municipalities");
+
+    $this->loadModel("Barangays");
     
 
     //sir raf
@@ -322,21 +330,11 @@ class SelectController extends AppController {
 
     } else if ($code == 'room-list') {
      
-      $tmp = $this->Room->find('all', array(
+      $tmp = $this->Rooms->find()
 
-        'conditions' => array(
+            ->where(['visible' => 1])
 
-          'Room.visible' => true
-
-        ),
-
-        'order' => array(
-
-          'Room.id' => 'ASC',
-
-        )
-
-      ));
+            ->order(['id' => 'ASC']);
 
       if(!empty($tmp)){
 
@@ -344,9 +342,9 @@ class SelectController extends AppController {
 
           $datas[] = array(
 
-            'id'    => $data['Room']['id'],
+            'id'    => $data['id'],
 
-            'value' => $data['Room']['code'].' - '.$data['Room']['name'],
+            'value' => $data['code'].' - '.$data['name'],
 
           );
 
@@ -2180,41 +2178,32 @@ class SelectController extends AppController {
 
     } else if ($code == 'program-course-list') {
 
-      $id = $this->request->query['id'];
+      $id = $this->request->getQuery('id');
 
-      $tmp = $this->CollegeProgramCourse->find('all', array(
-
-        'conditions' => array(
-
-          'CollegeProgramCourse.visible' => true,
-
-          'CollegeProgramCourse.college_program_id' => $id
-
-        ),
-
-        'order' => array(
-
-          'CollegeProgramCourse.id' => 'ASC',
-
-        )
-
-      ));
+      $tmp = $this->CollegeProgramCourses->find()
+          ->where([
+              'visible' => 1,
+          ])
+          ->order([
+              'id' => 'ASC',
+          ])
+          ->all();
 
       if(!empty($tmp)){
 
         foreach ($tmp as $k => $data) {
 
-          $course = $this->Course->findById($data['CollegeProgramCourse']['course_id']);
+          $course = $this->Courses->get($data['course_id']);
 
           $datas[] = array(
 
-            'id'          => $data['CollegeProgramCourse']['id'],
+            'id'          => $data['id'],
 
-            'course_id'   => $data['CollegeProgramCourse']['course_id'],
+            'course_id'   => $data['course_id'],
 
-            'course_code' => @$course['Course']['code'],
+            'course_code' => @$course['code'],
 
-            'value'       => $data['CollegeProgramCourse']['course'],
+            'value'       => $data['course'],
 
           );
 
@@ -2455,29 +2444,22 @@ class SelectController extends AppController {
 
       $conditions = array();
 
-      $conditions['Municipality.visible'] = true;
+      $conditions['visible'] = 1;
 
-      if(isset($this->request->query['province_id'])){
+      if($this->request->getQuery('province_id')){
 
-        $province_id = $this->request->query['province_id'];
+        $province_id = $this->request->getQuery('province_id');
 
-        $provinceData = $this->Province->findById($province_id);
+        $provinceData = $this->Provinces->get($province_id);
 
-        $conditions['Municipality.provCode'] = $provinceData['Province']['provCode'];
+        $conditions['provCode'] = $provinceData['provCode'];
 
       }
 
-      $tmp = $this->Municipality->find('all', array(
-
-        'conditions' => $conditions,
-
-        'order' => array(
-
-          'Municipality.citymunDesc' => 'ASC',
-
-        )
-
-      ));
+      $tmp = $this->Municipalities->find()
+          ->where($conditions)
+          ->order(['citymunDesc' => 'ASC'])
+          ->all();
 
       if(!empty($tmp)){
 
@@ -2485,9 +2467,9 @@ class SelectController extends AppController {
 
           $datas[] = array(
 
-            'id'      => $data['Municipality']['id'],
+            'id'      => $data['id'],
 
-            'value'   => $data['Municipality']['citymunDesc']
+            'value'   => $data['citymunDesc']
 
           );
 
@@ -2499,29 +2481,23 @@ class SelectController extends AppController {
 
       $conditions = array();
 
-      $conditions['Barangay.visible'] = true;
+      $conditions['visible'] = 1;
 
-      if(isset($this->request->query['town_id'])){
+      if($this->request->getQuery('town_id')){
 
-        $town_id = $this->request->query['town_id'];
+        $town_id = $this->request->getQuery('town_id');
 
-        $townData = $this->Municipality->findById($town_id);
+        $townData = $this->Municipalities->get($town_id);
 
-        $conditions['Barangay.citymunCode'] = $townData['Municipality']['citymunCode'];
+        $conditions['citymunCode'] = $townData['citymunCode'];
 
       }
 
-      $tmp = $this->Barangay->find('all', array(
+      $tmp = $this->Barangays->find()
+          ->where($conditions)
+          ->order(['brgyDesc' => 'ASC'])
+          ->all();
 
-        'conditions' => $conditions,
-
-        'order' => array(
-
-          'Barangay.brgyDesc' => 'ASC',
-
-        )
-
-      ));
 
       if(!empty($tmp)){
 
@@ -2529,9 +2505,9 @@ class SelectController extends AppController {
 
           $datas[] = array(
 
-            'id'      => $data['Barangay']['id'],
+            'id'      => $data['id'],
 
-            'value'   => $data['Barangay']['brgyDesc']
+            'value'   => $data['brgyDesc']
 
           );
 
@@ -2543,27 +2519,25 @@ class SelectController extends AppController {
 
       $conditions = array();
 
-      $conditions['ZipCode.visible'] = true;
+      $conditions['visible'] = 1;
 
-      if(isset($this->request->query['town_id'])){
+      if($this->request->getQuery('town_id')){
 
-        $town_id = $this->request->query['town_id'];
+        $town_id = $this->request->getQuery('town_id');
 
-        $townData = $this->Municipality->findById($town_id);
+        $townData = $this->Municipalities->get($town_id);
         
-        $conditions['LOWER(ZipCode.citymunDesc)'] = strtolower($townData['Municipality']['citymunDesc']);
+        $conditions['LOWER(citymunDesc)'] = strtolower($townData['citymunDesc']);
 
       }
 
-      $tmp = $this->ZipCode->find('first', array(
-
-        'conditions' => $conditions,
-
-      ));
+      $tmp = $this->ZipCodes->find()
+          ->where($conditions)
+          ->first();
 
       if(!empty($tmp)){
 
-        $datas = $tmp['ZipCode']['zip_code'];
+        $datas = $tmp['zip_code'];
 
       }
 
@@ -8563,19 +8537,13 @@ class SelectController extends AppController {
 
     } else if ($code == 'gco-evaluation-code'){
 
-      $tmp = $this->GcoEvaluation->query("
+      $tmp = $this->GcoEvaluations->find()->where([
 
-        SELECT 
+        "visible" => 1
 
-          count(*) as total
-
-        FROM 
-
-          gco_evaluations as GcoEvaluation
-
-      ");
+      ])->count();
    
-      $datas = 'GCE-' . str_pad($tmp[0][0]['total'] + 1, 5, "0", STR_PAD_LEFT);
+      $datas = 'GCE-' . str_pad($tmp + 1, 5, "0", STR_PAD_LEFT);
 
     } else if ($code == 'attendance-counseling-code'){
 
@@ -8691,19 +8659,14 @@ class SelectController extends AppController {
 
     } else if ($code == 'dental-code'){
 
-      $tmp = $this->Dental->query("
+      $tmp = $this->Dentals->find()->where([
 
-        SELECT 
+        "visible" => 1
 
-          count(*) as total
-
-        FROM 
-
-          dentals as Dental
-
-      ");
+      ])->count();
    
-      $datas = 'DEN-' . str_pad($tmp[0][0]['total'] + 1, 5, "0", STR_PAD_LEFT);
+   
+      $datas = 'DEN-' . str_pad($tmp + 1, 5, "0", STR_PAD_LEFT);
 
     }else if ($code == 'medical-consent-code'){
 
@@ -8723,19 +8686,13 @@ class SelectController extends AppController {
 
     }else if ($code == 'apartelle-code'){
 
-      $tmp = $this->Apartelle->query("
+      $tmp = $this->Apartelles->find()->where([
 
-        SELECT 
+        "visible" => 1
 
-          count(*) as total
-
-        FROM 
-
-          apartelles as Apartelle
-
-      ");
+      ])->count();
    
-      $datas = 'APT-' . str_pad($tmp[0][0]['total'] + 1, 5, "0", STR_PAD_LEFT);
+      $datas = 'APT-' . str_pad($tmp + 1, 5, "0", STR_PAD_LEFT);
 
     }else if($code == 'student-clearance-code'){
 
@@ -8939,9 +8896,9 @@ class SelectController extends AppController {
 
     } else if ($code == 'counseling-attendance-list') {
 
-      $student_id = $this->Session->read('Auth.User.studentId');
+      $student_id = $this->Auth->user('studentId');
 
-      $tmp = $this->AttendanceCounseling->query("
+      $tmp = "
 
         SELECT 
 
@@ -8965,17 +8922,21 @@ class SelectController extends AppController {
 
           CounselingAppointment.student_id = $student_id
 
-      ");
+      ";
 
-      if(!empty($tmp)){
+      $connection = $this->AttendanceCounselings->getConnection();
 
-        foreach ($tmp as $k => $data) {
+      $result = $connection->execute($tmp)->fetchAll('assoc');
+
+      if(count($result)>0){
+
+        foreach ($result as $k => $data) {
 
           $datas[] = array(
 
-            'id'    => $data['AttendanceCounseling']['id'],
+            'id'    => $data['id'],
 
-            'value' => $data['AttendanceCounseling']['code'].'( '.$data['CounselingAppointment']['counselor_name'].' :: '.fdate($data['AttendanceCounseling']['date'],'m/d/Y').' :: '.fdate($data['AttendanceCounseling']['time'],'h:i A').' )',
+            'value' => $data['code'].'( '.$data['counselor_name'].' :: '.fdate($data['date'],'m/d/Y').' :: '.fdate($data['time'],'h:i A').' )',
 
           );
 

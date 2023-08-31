@@ -473,11 +473,11 @@ app.controller("ScholarshipApplicationAddController", function ($scope, Scholars
 
       });
 
-      // Select.get({ code: 'zip-list',town_id: id}, function (e){
+      Select.get({ code: 'zip-list',town_id: id}, function (e){
 
-      //   $scope.data.StudentProfile.zip_code = e.data;
+        $scope.data.StudentProfile.zip_code = e.data;
 
-      // });
+      });
 
     }else{
 
@@ -825,7 +825,7 @@ app.controller("ScholarshipApplicationEditController", function ($scope, $routeP
 
 });
 
-app.controller("AdminScholarshipApplicationController", function ($scope, ScholarshipApplication) {
+app.controller("AdminScholarshipApplicationController", function ($scope, ScholarshipApplication,ScholarshipApplicationViewGrade,Select,ScholarshipApplicationRequestData) {
   
   $scope.today = Date.parse("today").toString("MM/dd/yyyy");
 
@@ -1136,6 +1136,54 @@ app.controller("AdminScholarshipApplicationController", function ($scope, Schola
 
   };
 
+  $scope.viewGrade = function (id) {
+
+    
+    ScholarshipApplicationViewGrade.get({id:id}, function(e){
+      console.log(e);
+
+      if(e.ok){
+        $scope.StudentEnrolledCourse = e.data.StudentEnrolledCourse;
+        $scope.grade = e.data.grade;
+        $scope.Student = e.data.Student;
+        $scope.ScholarshipApplication = e.data.ScholarshipApplication;
+        $scope.na = e.data.na;
+        $("#view-grade").modal("show");
+      }
+    });
+        $scope.load();
+  };
+
+  $scope.requestData = function(data){
+    bootbox.confirm('Are you sure you want to qualify this student for the scholarship?', function(e){
+      // console.log(data);
+      if(e) {
+
+        ScholarshipApplicationRequestData.get({id:data.id}, function(e){
+
+          if(e.ok){
+
+            $scope.load();
+
+            $.gritter.add({
+
+              title: 'Successful!',
+
+              text: e.msg
+
+            });
+            $("#view-grade").modal("hide");
+          }
+
+          window.location = "#/admission/admin-scholarship-application";
+
+        });
+
+      }
+
+    });
+  };
+
   $scope.remove = function (data) {
 
     bootbox.confirm("Are you sure you want to delete " + data.code + " ?", function (c) {
@@ -1274,6 +1322,12 @@ app.controller("AdminScholarshipApplicationAddController", function ($scope, Sch
   Select.get({ code: "school-list" }, function (e) {
 
     $scope.school = e.data;
+
+  });
+
+  Select.get({code: 'year-term-list'}, function(e) {
+
+    $scope.year_terms = e.data;
 
   });
 
@@ -1664,6 +1718,13 @@ app.controller("AdminScholarshipApplicationEditController", function ($scope, $r
     $scope.barangays = e.data;
 
   });
+
+  Select.get({code: 'year-term-list'}, function(e) {
+
+    $scope.year_terms = e.data;
+
+  });
+
 
   $scope.getTown = function(id){
 

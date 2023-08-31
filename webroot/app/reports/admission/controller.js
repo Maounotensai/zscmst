@@ -274,8 +274,6 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
 
     options['status'] = 0;
 
-    options['rate'] = 1;
-
     ListApplicant.query(options, function(e) {
 
       if (e.ok) {
@@ -300,8 +298,6 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
 
     options['status'] = 1;
 
-    options['rate'] = 1;
-
     ListApplicant.query(options, function(e) {
 
       if (e.ok) {
@@ -322,13 +318,37 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
 
   }
 
+   $scope.confirmed = function(options) {
+
+    options = typeof options !== 'undefined' ?  options : {};
+
+    options['status'] = 4;
+
+    ListApplicant.query(options, function(e) {
+
+      if (e.ok) {
+
+        $scope.datasConfirmed = e.data;
+
+        $scope.conditionsPrintConfirmed = e.conditionsPrint;
+
+        // paginator
+
+        $scope.paginatorConfirmed  = e.paginator;
+
+        $scope.pagesConfirmed = paginator($scope.paginatorConfirmed, 5);
+
+      }
+
+    });
+
+  }
+
   $scope.disapproved = function(options) {
 
     options = typeof options !== 'undefined' ?  options : {};
 
     options['status'] = 2;
-
-    options['rate'] = 1;
 
     ListApplicant.query(options, function(e) {
 
@@ -357,6 +377,8 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
     $scope.approved(options);
 
     $scope.disapproved(options);
+
+    $scope.confirmed(options);
 
   }
 
@@ -576,15 +598,15 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
 
   }
 
-  $scope.print = function(){
+ $scope.print = function(){
 
     if ($scope.conditionsPrintPending !== '') {
     
-      printTable(base + 'print/student_application?print=1' + $scope.conditionsPrint);
+      printTable(base + 'print/student_applications?print=1' + $scope.conditionsPrint);
 
     }else{
 
-      printTable(base + 'print/student_application?print=1');
+      printTable(base + 'print/student_applications?print=1');
 
     }
 
@@ -594,11 +616,25 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
 
     if ($scope.conditionsPrintApproved !== '') {
     
-      printTable(base + 'print/student_application?print=1' + $scope.conditionsPrintApproved);
+      printTable(base + 'print/student_applications?print=1' + $scope.conditionsPrintApproved);
 
     }else{
 
-      printTable(base + 'print/student_application?print=1');
+      printTable(base + 'print/student_applications?print=1');
+
+    }
+
+  }
+
+  $scope.printConfirmed = function(){
+
+    if ($scope.conditionsPrintApproved !== '') {
+    
+      printTable(base + 'print/student_applications?print=1' + $scope.conditionsPrintConfirmed);
+
+    }else{
+
+      printTable(base + 'print/student_applications?print=1');
 
     }
 
@@ -606,13 +642,13 @@ app.controller('ListApplicantsController', function($scope, ListApplicant) {
 
   $scope.printDisapproved = function(){
 
-    if ($scope.conditionsPrintDisapproved !== '') {
+    if ($scope.conditionsPrintDispproved !== '') {
     
-      printTable(base + 'print/student_application?print=1' + $scope.conditionsPrintDisapproved);
+      printTable(base + 'print/student_applications?print=1' + $scope.conditionsPrintDispproved);
 
     }else{
 
-      printTable(base + 'print/student_application?print=1');
+      printTable(base + 'print/student_applications?print=1');
 
     }
 

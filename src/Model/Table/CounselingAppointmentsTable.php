@@ -132,7 +132,10 @@ class CounselingAppointmentsTable extends Table{
 
         CounselingAppointment.code DESC
 
-    ";
+
+      LIMIT
+
+        $limit OFFSET $offset ";
 
     $query = $this->getConnection()->prepare($sql);
 

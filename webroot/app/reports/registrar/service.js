@@ -14,7 +14,7 @@ app.factory("CollegeProgramReport", function($resource) {
 
 app.factory("EnrollmentListReport", function($resource) {
 
-  return $resource( api + "reports/enrollment_list/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "Reports/enrollment_list/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -70,7 +70,7 @@ app.factory("PromotedStudent", function($resource) {
 
 app.factory("StudentBehaviorReport", function($resource) {
 
-  return $resource( api + "reports/student_behavior/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "Reports/student_behavior/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -84,7 +84,7 @@ app.factory("StudentBehaviorReport", function($resource) {
 
 app.factory("AcademicFailuresList", function($resource) {
 
-  return $resource( api + "reports/academic_failures_list/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "Reports/academic_failures_list/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -156,7 +156,7 @@ app.factory("GWA", function($resource) {
 
 app.factory("EnrollmentProfile", function($resource) {
 
-  return $resource( api + "reports/enrollment_profile/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "Reports/enrollment_profile/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -167,3 +167,4 @@ app.factory("EnrollmentProfile", function($resource) {
   });
 
 });
+

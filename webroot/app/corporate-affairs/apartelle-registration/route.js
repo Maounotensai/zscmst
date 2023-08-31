@@ -40,7 +40,7 @@
 
   .when('/corporate-affairs/admin-apartelle-registration', {
 
-    templateUrl: 'angularjs/views/apartelle-registration/admin-index.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle-registration/admin-index.ctp',
 
     controller: 'AdminApartelleRegistrationController',
 
@@ -49,7 +49,7 @@
 
   .when('/corporate-affairs/admin-apartelle-registration/add', {
 
-    templateUrl: 'angularjs/views/apartelle-registration/admin-add.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle-registration/admin-add.ctp',
 
     controller: 'AdminApartelleRegistrationAddController',
 
@@ -58,7 +58,7 @@
 
   .when('/corporate-affairs/admin-apartelle-registration/edit/:id', {
 
-    templateUrl: 'angularjs/views/apartelle-registration/admin-edit.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle-registration/admin-edit.ctp',
 
     controller: 'AdminApartelleRegistrationEditController',
 
@@ -66,7 +66,7 @@
 
   .when('/corporate-affairs/admin-apartelle-registration/view/:id', {
 
-    templateUrl: 'angularjs/views/apartelle-registration/admin-view.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle-registration/admin-view.ctp',
 
     controller: 'AdminApartelleRegistrationViewController',
 

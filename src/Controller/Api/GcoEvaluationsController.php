@@ -81,10 +81,14 @@ class GcoEvaluationsController extends AppController {
     if ($this->request->getQuery('per_student')) {
 
       $per_student = $this->request->getQuery('per_student');
-      
-      // $student_id = $this->Session->read('Auth.User.studentId');
 
-      $conditions['studentId'] = "AND GcoEvaluation.student_id = $per_student";
+      $employee_id = $this->Auth->user('studentId');
+
+      if ($employee_id!='') {
+
+        $conditions['studentId'] = "AND GcoEvaluation.student_id = $employee_id";
+
+      }
 
       $conditionsPrint .= '&per_student='.$per_student;
 

@@ -17,7 +17,7 @@
 
             <?php if($currentUser->role->code == 'Student'){ ?>
 
-              <a class="dropdown-item"  href="#/profile/student-profile/view-profile/<?php echo $currentUser->Student->id?>"> Profile</a>
+              <a class="dropdown-item"  href="#/profile/student-profile/view-profile/<?php echo $currentUser->student->id; ?>"> Profile</a>
 
             <?php } else {?>
 
@@ -30,7 +30,7 @@
              Theme Editor
 
             </a>
-            <a class="dropdown-item" href="<?= $this->Url->build('/logout') ?>">
+            <a class="dropdown-item" href="<?= $this->Url->build('/logout')?>">
               <i class="fa fa-sign-out pull-right"></i> Log Out
             </a>
             <!-- <a href="<?= $this->Url->build('/logout') ?>"><span>Logout</span></a> -->

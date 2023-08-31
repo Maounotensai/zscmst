@@ -4,19 +4,25 @@
 
   use Cake\ORM\Table;
 
-  class ReferralRecommendationsTable extends Table{
+class ReferralRecommendationsTable extends Table{
 
-    public function initialize(array $config): void{
+  public function initialize(array $config): void{
 
-      $this->addBehavior('Timestamp');
+    $this->addBehavior('Timestamp');
 
-      $this->belongsTo('NurseProfiles', [
+    $this->belongsTo('NurseProfiles', [
 
       'foreignKey' => 'attended_by_id', 
 
     ]);
 
-    }
+    $this->belongsTo('Students', [
+
+      'foreignKey' => 'student_id', 
+
+    ]);
+
+  }
 
     public function getAllReferralRecommendation($conditions, $limit, $page){
 
@@ -28,7 +34,7 @@
 
       $status = @$conditions['status'];
 
-      $studentId = @$conditions['studetnId'];
+      $studentId = @$conditions['studentId'];
 
       $offset = ($page - 1) * $limit;
 
@@ -74,6 +80,8 @@
           
       ";
 
+      // var_dump($sql);
+
       $query = $this->getConnection()->prepare($sql);
 
       $query->execute();
@@ -90,7 +98,7 @@
 
       $status = @$conditions['status'];
 
-      $studentId = @$conditions['studetnId'];
+      $studentId = @$conditions['studentId'];
 
       $sql = "
 

@@ -105,6 +105,7 @@
   </div>
 </div>
 <?php endif ?>
+
 <div class="modal fade" id="advance-search-modal">
   <div class="modal-dialog">
     <div class="modal-content">

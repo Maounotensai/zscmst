@@ -30,7 +30,7 @@ app.controller('SettingController', function($scope, Setting,Select){
 
   $scope.updateValue = function(data) {
 
-    Setting.save({id:data.id}, data, function(e){
+    Setting.update({id:data.id}, data, function(e){
 
       if(e.response){
 

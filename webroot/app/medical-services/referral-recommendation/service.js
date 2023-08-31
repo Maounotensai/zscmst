@@ -54,11 +54,8 @@ app.factory("ReferralRecommendationDisapprove", function($resource, $http) {
 
 });
 
-app.factory("ReferralRecommendationApprove", function($resource, $http) {
+app.factory("ReferralRecommendationApprove", function($resource) {
 
-  var csrfToken = angular.element(document.querySelector('meta[name="csrf-token"]')).attr('content');
-  
-  $http.defaults.headers.common['X-CSRF-Token'] = csrfToken;
 
   return $resource( api + "ReferralRecommendations/approve/:id", { id: '@id' }, {
 

@@ -169,7 +169,7 @@ class SettingsController extends AppController {
 
   public function view($id = null){
 
-    $data['Account'] = $this->Accounts->find()
+    $data['Setting'] = $this->Settings->find()
 
       ->where([
 
@@ -180,10 +180,6 @@ class SettingsController extends AppController {
       ])
 
       ->first();
-
-    $data['Account']['active_view'] = $data['Account']['active'] ? 'True' : 'False';
-
-    $data['Account']['floors'] = intval($data['Account']['floors']);
 
     $response = [
 
@@ -211,65 +207,43 @@ class SettingsController extends AppController {
 
   public function edit($id){
 
-    $building = $this->Accounts->get($id); 
+    $setting = $this->Settings->get($id); 
 
-    $requestData = $this->getRequest()->getData('Account');
+    $requestData = $this->request->getData();
 
-    $requestData['date'] = isset($requestData['date']) ? date('Y/m/d', strtotime($requestData['date'])) : null;
-
-    $this->Accounts->patchEntity($building, $requestData); 
-
-    if ($this->Accounts->save($building)) {
-
-      $response = array(
-
-        'ok'  =>true,
-
-        'msg' =>'Chart of Accounts has been successfully updated.',
-
-        'data'=>$requestData
-
-      );
-        
-      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
-        
-      $userLogEntity = $userLogTable->newEntity([
-
-          'action' => 'Edit',
-
-          'description' => 'Chart of Accounts',
-
-          'code' => $requestData['code'],
-
-          'created' => date('Y-m-d H:i:s'),
-
-          'modified' => date('Y-m-d H:i:s')
-
-      ]);
+    // var_dump($requestData);
+    
+    $setting = $this->Settings->patchEntity($setting, $requestData);
+    
+    if ($this->Settings->save($setting)) {
       
-      $userLogTable->save($userLogEntity);
-
-    }else {
-
-      $response = array(
-
-        'ok'  =>true,
-
-        'data'=>$requestData,
-
-        'msg' =>'Chart of Accounts cannot updated this time.',
-
-      );
-
+        $response = [
+          
+            'response' => true,
+            
+            'message' => 'Information has been saved.'
+            
+        ];
+        
+    } else {
+      
+        $response = [
+          
+            'response' => false,
+            
+            'message' => 'Failed to save information.'
+            
+        ];
+        
     }
 
-    $this->set(array(
-
-      'response'=>$response,
-
-      '_serialize'=>'response'
-
-    ));
+    $this->set([
+      
+        'response' => $response,
+        
+        '_serialize' => 'response'
+        
+    ]);
 
     $this->response->withType('application/json');
 
@@ -285,17 +259,17 @@ class SettingsController extends AppController {
 
     $this->request->allowMethod(['delete']);
 
-    $data = $this->Accounts->get($id);
+    $data = $this->Settings->get($id);
 
     $data->visible = 0;
 
-    if ($this->Accounts->save($data)) {
+    if ($this->Settings->save($data)) {
 
       $response = [
 
         'ok' => true,
 
-        'msg' => 'Chart of Accounts has been successfully deleted'
+        'msg' => 'Chart of Settings has been successfully deleted'
 
       ];
 
@@ -305,7 +279,7 @@ class SettingsController extends AppController {
 
           'action' => 'Delete',
 
-          'description' => 'Chart of Accounts',
+          'description' => 'Chart of Settings',
 
           'code' => $data->code,
 
@@ -323,7 +297,7 @@ class SettingsController extends AppController {
 
         'ok' => false,
 
-        'msg' => 'Chart of Accounts cannot be deleted at this time.'
+        'msg' => 'Chart of Settings cannot be deleted at this time.'
 
       ];
 

@@ -4,7 +4,7 @@ app.config(function($routeProvider) {
 
   .when('/corporate-affairs/apartelle', {
 
-    templateUrl: 'angularjs/views/apartelle/index.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle/index.ctp',
 
     controller: 'ApartelleController',
 
@@ -12,7 +12,7 @@ app.config(function($routeProvider) {
 
   .when('/corporate-affairs/apartelle/add', {
 
-    templateUrl: 'angularjs/views/apartelle/add.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle/add.ctp',
 
     controller: 'ApartelleAddController',
 
@@ -20,7 +20,7 @@ app.config(function($routeProvider) {
 
   .when('/corporate-affairs/apartelle/edit/:id', {
 
-    templateUrl: 'angularjs/views/apartelle/edit.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle/edit.ctp',
 
     controller: 'ApartelleEditController',
 
@@ -28,7 +28,7 @@ app.config(function($routeProvider) {
 
   .when('/corporate-affairs/apartelle/view/:id', {
 
-    templateUrl: 'angularjs/views/apartelle/view.ctp',
+    templateUrl: 'angularjs/views/corporate-affairs/apartelle/view.ctp',
 
     controller: 'ApartelleViewController',
 

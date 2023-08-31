@@ -12,7 +12,7 @@
 
       $this->belongsTo('CollegePrograms', [
 
-        'foreignKey' => 'course_id', 
+        'foreignKey' => 'program_id', 
 
       ]);
 
@@ -28,7 +28,7 @@
 
       ]);
 
-      $this->belongsTo('Municipalitys', [
+      $this->belongsTo('Municipalities', [
 
         'foreignKey' => 'town_id', 
 
@@ -49,6 +49,12 @@
       $this->belongsTo('ScholarshipNames', [
 
         'foreignKey' => 'scholarship_name_id', 
+
+      ]);
+
+      $this->belongsTo('YearLevelTerms', [
+
+        'foreignKey' => 'year_term_id', 
 
       ]);
 
@@ -105,8 +111,7 @@
       ORDER BY 
 
       ScholarshipApplication.student_name ASC
-        
-    ";
+      ";
 
 
     $query = $this->getConnection()->prepare($sql);
@@ -171,7 +176,10 @@
 
       ScholarshipApplication.student_name ASC
         
-    ";
+            
+    LIMIT
+
+      $limit OFFSET $offset ";
 
     $query = $this->getConnection()->prepare($sql);
 

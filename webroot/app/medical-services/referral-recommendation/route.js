@@ -33,29 +33,42 @@ app.config(function($routeProvider) {
     controller: 'ReferralRecommendationViewController',
 
   })
-  // .when("/medical-services/referral-recommendation/student-index", {
-  //   templateUrl: tmp + "medical_services__referral_recommendation__student_index",
 
-  //   controller: "StudentReferralRecommendationController",
-  // })
+  .when("/medical-services/referral-recommendation/student-index", {
 
-  // .when("/medical-services/referral-recommendation/student-add", {
-  //   templateUrl: tmp + "medical_services__referral_recommendation__student_add",
+    templateUrl: 'angularjs/views/medical-services/referral-recommendation/student-index.ctp',
 
-  //   controller: "StudentReferralRecommendationAddController",
-  // })
 
-  // .when("/medical-services/referral-recommendation/student-edit/:id", {
-  //   templateUrl: tmp + "medical_services__referral_recommendation__student_edit",
+    controller: "StudentReferralRecommendationController",
 
-  //   controller: "StudentReferralRecommendationEditController",
-  // })
+  })
 
-  // .when("/medical-services/referral-recommendation/student-view/:id", {
-  //   templateUrl: tmp + "medical_services__referral_recommendation__student_view",
+  .when("/medical-services/referral-recommendation/student-add", {
 
-  //   controller: "StudentReferralRecommendationViewController",
-  // })
+    templateUrl: 'angularjs/views/medical-services/referral-recommendation/student-add.ctp',
+
+
+    controller: "StudentReferralRecommendationAddController",
+
+  })
+
+  .when("/medical-services/referral-recommendation/student-edit/:id", {
+
+    templateUrl: 'angularjs/views/medical-services/referral-recommendation/student-edit.ctp',
+
+
+    controller: "StudentReferralRecommendationEditController",
+
+  })
+
+  .when("/medical-services/referral-recommendation/student-view/:id", {
+
+    templateUrl: 'angularjs/views/medical-services/referral-recommendation/student-view.ctp',
+
+
+    controller: "StudentReferralRecommendationViewController",
+
+  })
   ;
   
 });

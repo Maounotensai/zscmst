@@ -28,7 +28,9 @@ class ReferralRecommendationsController extends AppController {
 
     $conditions = [];
 
-    // $conditionsPrint = '';
+    $conditions['search'] = '';
+
+    $conditionsPrint = '';
 
     if ($this->request->getQuery('search')) {
 
@@ -37,6 +39,40 @@ class ReferralRecommendationsController extends AppController {
       $search = strtolower($search);
 
       $conditions['search'] = $search;
+
+      $conditionsPrint .= '&search='.$search;
+
+    }
+
+     $conditions['date'] = '';
+
+    if ($this->request->getQuery('date')) {
+
+      $search_date = $this->request->getQuery('date');
+
+      $conditions['date'] = " AND DATE(ReferralRecommendation.date) = '$search_date'"; 
+
+      $dates['date'] = $search_date;
+
+      $conditionsPrint .= '&date='.$search_date;
+
+    }  
+
+    //advance search
+
+    if ($this->request->getQuery('startdate')) {
+
+      $start = $this->request->getQuery('startdate'); 
+
+      $end = $this->request->getQuery('endDate');
+
+      $conditions['date'] = " AND DATE(ReferralRecommendation.date) >= '$start' AND DATE(ReferralRecommendation.date) <= '$end'";
+
+      $dates['startDate'] = $start;
+
+      $dates['endDate']   = $end;
+
+      $conditionsPrint .= '&startDate='.$start.'&endDate='.$end;
 
     }
 
@@ -48,7 +84,7 @@ class ReferralRecommendationsController extends AppController {
 
       $conditions['status'] = "AND ReferralRecommendation.status = $status";
  
-      // $conditionsPrint .= '&status='.$this->request->getQuery('status');
+      $conditionsPrint .= '&status='.$this->request->getQuery('status');
 
     }
 
@@ -57,12 +93,12 @@ class ReferralRecommendationsController extends AppController {
     if ($this->request->getQuery('per_student')) {
 
       $per_student = $this->request->getQuery('per_student');
-      
-      $studentId = $this->Session->read('Auth.User.studentId');
 
-      $conditions['studentId'] = "AND ReferralRecommendation.student_id = $studentId";
+      $employee_id = $this->Auth->user('studentId');
 
-      // $conditionsPrint .= '&per_student='.$per_student;
+      $conditions['studentId'] = "AND ReferralRecommendation.student_id = $employee_id";
+
+      $conditionsPrint .= '&per_student='.$per_student;
 
     }
 
@@ -83,6 +119,8 @@ class ReferralRecommendationsController extends AppController {
       'limit' => $limit
 
     ]);
+
+    // var_dump($conditions);
 
     $referralRecommendations = $tmpData['data'];
 
@@ -119,6 +157,9 @@ class ReferralRecommendationsController extends AppController {
       'data' => $datas,
 
       'paginator' => $paginator,
+
+      'conditionsPrint' => $conditionsPrint
+
 
     ];
 
@@ -222,11 +263,6 @@ class ReferralRecommendationsController extends AppController {
 
       ->first();
 
-    $data['ReferralRecommendation']['active_view'] = $data['ReferralRecommendation']['active'] ? 'True' : 'False';
-
-    $data['ReferralRecommendation']['date'] = $data['ReferralRecommendation']['date']->format('m/d/Y');
-
-    $data['ReferralRecommendation']['floors'] = intval($data['ReferralRecommendation']['floors']);
 
     $response = [
 
@@ -388,6 +424,141 @@ class ReferralRecommendationsController extends AppController {
 
     return $this->response;
 
+  }
+
+  public function approve($id = null){
+
+    $this->autoRender = false;
+
+    $data = $this->ReferralRecommendations->get($id);
+
+    $data->status = 3;
+
+    if ($this->ReferralRecommendations->save($data)) {
+
+      $response = [
+
+        'ok' => true,
+
+        'msg' => 'Referral Recommendation has been successfully approved'
+
+      ];
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'approve',
+
+          'description' => 'Referral Recommendation',
+
+          'code' => $data['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+      
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = [
+
+        'ok' => false,
+
+        'msg' => 'Referral Recommendation cannot be approved at this time.'
+
+      ];
+
+    }
+
+    $this->set([
+
+      'response' => $response,
+
+      '_serialize' => 'response'
+
+    ]);
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+
+
+  }  
+  public function disapprove($id = null){
+
+    $this->autoRender = false;
+
+    $data = $this->ReferralRecommendations->get($id);
+
+     $data->status = 4;
+
+    // $data->disapprove_by_id = $this->currentUser->id;
+
+    $data->disapproved_reason = $this->getRequest()->getData('explanation');
+
+    if($this->ReferralRecommendations->save($data)){
+
+      $response = array(
+
+        'ok'   => true,
+
+        'data' => $data,       
+
+        'msg'  => 'Referral Recommendation has been successfully disapproved.'
+
+      );
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'Disapproved',
+
+          'description' => 'Referral Recommendation',
+
+          'code' => $requestData['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+      
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = array(
+
+        'ok'   => false,
+
+        'data' => $data,
+
+        'msg'  =>'Referral Recommendation cannot be disapproved this time.'
+
+      );
+
+    }
+
+    $this->set(array(
+
+      'response'=>$response,
+
+      '_serialize'=>'response'
+
+    ));
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+    
   }
 
 }

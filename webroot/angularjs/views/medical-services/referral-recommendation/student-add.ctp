@@ -54,6 +54,15 @@
               </div>
             </div>
 
+            <div class="col-md-6">
+              <div class="form-group">
+                <label> ATTENDED BY <i class="required">*</i></label>
+                <select selectize ng-model="data.ReferralRecommendation.attended_by_id" ng-options="opt.id as opt.value for opt in nurse" ng-change="getCourse(data.ReferralRecommendation.attended_by_id)" data-validation-engine="validate[required]">
+                  <option value=""></option>
+                </select>
+              </div>
+            </div>
+
           </div>
         </form>
         <div class="clearfix"></div><hr>

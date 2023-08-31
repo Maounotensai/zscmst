@@ -100,10 +100,14 @@ class CounselingAppointmentsController extends AppController {
     if ($this->request->getQuery('per_student')) {
 
       $per_student = $this->request->getQuery('per_student');
-      
-      $studentId = $this->Session->read('Auth.User.studentId');
 
-      $conditions['studentId'] = "AND CounselingAppointment.student_id = $studentId";
+      $employee_id = $this->Auth->user('studentId');
+
+      if ($employee_id!='') {
+
+        $conditions['studentId'] = "AND CounselingAppointment.student_id = $employee_id";
+
+      }
 
       $conditionsPrint .= '&per_student='.$per_student;
 
@@ -125,13 +129,13 @@ class CounselingAppointmentsController extends AppController {
 
     ]);
 
-    $CounselingAppointment = $tmpData['data'];
+    $counselingAppointment = $tmpData['data'];
 
     $paginator = $tmpData['pagination'];
 
     $datas = [];
-    // var_dump($CounselingAppointment);
-    foreach ($CounselingAppointment as $data) {
+
+    foreach ($counselingAppointment as $data) {
 
       $datas[] = array(
           
@@ -251,22 +255,37 @@ class CounselingAppointmentsController extends AppController {
 
 
     $data['CounselingAppointment'] = $this->CounselingAppointment->find()
+
     ->contain([
+
         'CounselingTypes' => [
+
             'conditions' => ['CounselingTypes.visible' => 1]
-        ]
+
+        ],
+
+        'Students'
+
     ])
     ->where([
+
         'CounselingAppointments.visible' => 1,
+
         'CounselingAppointments.id' => $id
+
     ])
+
     ->first();
 
       $data['CounselingAppointment']['date'] = isset($data['CounselingAppointment']['date']) ? date('m/d/Y', strtotime($data['CounselingAppointment']['date'])) : null;
 
       $data['CounselingType'] = $data['CounselingAppointment']['counseling_type'];
 
+      $data['Student'] = $data['CounselingAppointment']['student'];
+
       unset($data['CounselingAppointment']['counseling_type']);
+
+      unset($data['CounselingAppointment']['student']);
 
     $response = [
 
@@ -427,7 +446,7 @@ class CounselingAppointmentsController extends AppController {
 
         'ok' => true,
 
-        'msg' => 'Attendance to Counseling has been successfully deleted'
+        'msg' => 'Attendance to Counseling has been successfully approved'
 
       ];
 
@@ -439,7 +458,7 @@ class CounselingAppointmentsController extends AppController {
 
           'description' => 'Attendance to Counseling',
 
-          'code' => $requestData['code'],
+          'code' => $data['code'],
 
           'created' => date('Y-m-d H:i:s'),
 
@@ -455,7 +474,7 @@ class CounselingAppointmentsController extends AppController {
 
         'ok' => false,
 
-        'msg' => 'Attendance to Counseling cannot be deleted at this time.'
+        'msg' => 'Attendance to Counseling cannot be approved at this time.'
 
       ];
 
@@ -560,7 +579,7 @@ class CounselingAppointmentsController extends AppController {
 
           'description' => 'Attendance to Counseling',
 
-          'code' => $requestData['code'],
+          'code' => $data['code'],
 
           'created' => date('Y-m-d H:i:s'),
 
@@ -609,7 +628,7 @@ class CounselingAppointmentsController extends AppController {
      $data->approve = 2;
 
     $data->disapprove_by_id = $this->currentUser->id;
-    // $requestData = $this->getRequest()->getData('explanation');
+
     $data->disapproved_reason = $this->getRequest()->getData('explanation');
 
     if($this->CounselingAppointment->save($data)){
@@ -663,7 +682,7 @@ class CounselingAppointmentsController extends AppController {
 
     ));
 
-        $this->response->withType('application/json');
+    $this->response->withType('application/json');
 
     $this->response->getBody()->write(json_encode($response));
 

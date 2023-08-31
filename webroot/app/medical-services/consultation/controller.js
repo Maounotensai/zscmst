@@ -1770,7 +1770,7 @@ app.controller("StudentConsultationController", function ($scope, Consultation) 
 
 });
 
-app.controller( "StudentConsultationAddController", function ($scope, Consultation, Select,Student) {
+app.controller( "StudentConsultationAddController", function ($scope, Consultation, Select, Student) {
 
   $("#form").validationEngine("attach");
 
@@ -1805,6 +1805,12 @@ app.controller( "StudentConsultationAddController", function ($scope, Consultati
   Select.get({ code: "ailment-list" }, function (e) {
 
     $scope.ailments = e.data;
+
+  });
+
+ Select.get({ code: "nurse-profile-list" }, function (e) {
+
+    $scope.nurse_profile = e.data;
 
   });
 
@@ -1871,16 +1877,25 @@ app.controller( "StudentConsultationAddController", function ($scope, Consultati
   Select.get({ code: "consultation" }, function (e) {
 
     $scope.data.Consultation.code = e.data;
+
     Student.get({ id: e.studentId }, function(response) {
 
       $scope.data.Consultation.student_id = response.data.Student.id;
 
       $scope.data.Consultation.student_name = response.data.Student.full_name;
-       $scope.data.Consultation.address = response.data.Student.present_address;
+
+      $scope.data.Consultation.address = response.data.Student.present_address;
+
       $scope.data.Consultation.sex = response.data.Student.gender;
+
       $scope.data.Consultation.age = response.data.Student.age;
+
       $scope.data.Consultation.date = Date.parse('today').toString('MM/dd/yyyy');
+
       $scope.data.Consultation.student_no = response.data.Student.student_no;
+
+      $scope.data.Consultation.classification = 'Student';
+
 
     });
 

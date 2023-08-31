@@ -4,7 +4,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/admission/list-students', {
 
-    templateUrl: tmp + 'reports__admission__list_students',
+    templateUrl: 'angularjs/views/reports/admission/list-students.ctp',
 
     controller: 'ListStudentController',
 
@@ -12,7 +12,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/admission/list-of-applicants', {
 
-    templateUrl: tmp + 'reports__admission__list_of_applicants',
+    templateUrl: 'angularjs/views/reports/admission/list-of-applicants.ctp',
 
     controller: 'ListApplicantsController',
 
@@ -20,7 +20,7 @@ app.config(function($routeProvider) {
 
     .when("/reports/admission/scholarship-evaluations", {
   
-    templateUrl: tmp + "reports__admission__scholarship_evaluations",
+    templateUrl: 'angularjs/views/reports/admission/scholarship-evaluations.ctp',
 
     controller: "ScholarshipEvaluationsController",
  

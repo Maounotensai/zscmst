@@ -4,7 +4,7 @@ $routeProvider
 
   .when("/admission/scholarship-application", {
   
-    templateUrl: tmp + "admission__scholarship_application__index",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/index',
 
     controller: "ScholarshipApplicationController",
  
@@ -12,7 +12,7 @@ $routeProvider
 
   .when("/admission/scholarship-application/add", {
   
-    templateUrl: tmp + "admission__scholarship_application__add",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/add.ctp',
 
     controller: "ScholarshipApplicationAddController",
 
@@ -20,7 +20,7 @@ $routeProvider
 
   .when("/admission/scholarship-application/edit/:id", {
  
-    templateUrl: tmp + "admission__scholarship_application__edit",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/edit.ctp',
 
     controller: "ScholarshipApplicationEditController",
 
@@ -28,7 +28,7 @@ $routeProvider
 
   .when("/admission/scholarship-application/view/:id", {
  
-    templateUrl: tmp + "admission__scholarship_application__view",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/view.ctp',
  
     controller: "ScholarshipApplicationViewController",
  
@@ -36,7 +36,7 @@ $routeProvider
 
   .when("/admission/admin-scholarship-application", {
   
-    templateUrl: tmp + "admission__scholarship_application__admin_index",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/admin-index.ctp',
 
     controller: "AdminScholarshipApplicationController",
  
@@ -44,7 +44,7 @@ $routeProvider
 
   .when("/admission/admin-scholarship-application/add", {
   
-    templateUrl: tmp + "admission__scholarship_application__admin_add",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/admin-add.ctp',
 
     controller: "AdminScholarshipApplicationAddController",
 
@@ -52,7 +52,7 @@ $routeProvider
 
   .when("/admission/admin-scholarship-application/edit/:id", {
  
-    templateUrl: tmp + "admission__scholarship_application__admin_edit",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/admin-edit.ctp',
 
     controller: "AdminScholarshipApplicationEditController",
 
@@ -60,7 +60,7 @@ $routeProvider
 
   .when("/admission/admin-scholarship-application/view/:id", {
  
-    templateUrl: tmp + "admission__scholarship_application__admin_view",
+    templateUrl: 'angularjs/views/registrar/scholarship-application/admin-view.ctp',
  
     controller: "AdminScholarshipApplicationViewController",
  

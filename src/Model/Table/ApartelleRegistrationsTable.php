@@ -22,6 +22,18 @@
 
       ]);
 
+      $this->belongsTo('Apartelles', [
+
+        'foreignKey' => 'apartelle_id', 
+
+      ]);
+
+      $this->belongsTo('CollegePrograms', [
+
+        'foreignKey' => 'program_id', 
+
+      ]);
+
     }
 
     public function getAllApartelleRegistration($conditions, $limit, $page){

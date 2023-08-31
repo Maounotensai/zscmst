@@ -1548,6 +1548,12 @@ app.controller( "StudentReferralRecommendationAddController", function ($scope, 
 
   });
 
+    Select.get({code: 'nurse-profile-list'}, function(e) {
+
+    $scope.nurse = e.data;
+
+  });
+
   $scope.getAilment = function(id){
 
     if($scope.ailments.length > 0){
@@ -1601,6 +1607,8 @@ app.controller( "StudentReferralRecommendationAddController", function ($scope, 
       $scope.data.ReferralRecommendation.student_name = response.data.Student.full_name;
 
       $scope.data.ReferralRecommendation.student_no = response.data.Student.student_no;
+
+      $scope.data.ReferralRecommendation.classification = 'Student';
 
     });
 

@@ -12,6 +12,10 @@ class ApartellesTable extends Table{
 
     $this->addBehavior('Timestamp');
 
+    $this->hasMany('ApartelleImages', [
+        'foreignKey' => 'apartelle_id',
+    ]);
+
   }
 
   public function getAllApartelle($conditions, $limit, $page){

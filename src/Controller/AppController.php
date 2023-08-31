@@ -134,27 +134,35 @@ class AppController extends Controller
 
         $currentUser = $this->Users->find()->contain([
 
-          'UserPermissions' => function (Query $query) {
+          'UserPermissions' => [
 
-            return $query->where(['UserPermissions.visible' => 1])->contain('Permissions');
+            'Permissions',
 
-          },
+            'conditions' => ['UserPermissions.visible' => 1]
 
-          'Roles' => function (Query $query) {
+          ],
 
-            return $query->where(['Roles.visible' => 1]);
+          'Roles' => [
 
-          },
+            'conditions' => ['Roles.visible' => 1]
 
-          'Students' => function (Query $query) {
+          ],
 
-            return $query->where(['Students.visible' => 1]);
+          'Students' =>[
 
-          }
+            'conditions' => ['Students.visible' => 1]]
+
+          
 
         ])
 
-        ->where(['Users.id' => $user['id']])
+        ->where([
+
+          'Users.visible' => 1,
+
+          'Users.id' => $user['id']
+
+        ])
 
         ->firstOrFail();
 
@@ -179,6 +187,8 @@ class AppController extends Controller
       }
 
       $this->currentUser = $currentUser;
+
+      $this->base = $base;
 
       $this->set(compact('base','currentUser','grades'));
 

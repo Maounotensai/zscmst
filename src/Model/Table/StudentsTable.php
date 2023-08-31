@@ -8,7 +8,62 @@ use Cake\Database\StatementInterface;
 
 class StudentsTable extends Table{
 
-  public function initialize(array $config): void{}
+  public function initialize(array $config): void{
+
+    $this->belongsTo('YearLevelTerms', [
+
+      'foreignKey' => 'year_term_id'
+
+    ]);
+
+    $this->belongsTo('Curriculums', [
+
+      'foreignKey' => 'curriculum_id'
+
+    ]);
+
+    // $this->hasOne('StudentProfiles', [
+
+    //   'foreignKey' => 'student_id'
+
+    // ]);
+
+    $this->belongsTo('Colleges', [
+
+      'foreignKey' => 'college_id'
+
+    ]);
+
+    $this->belongsTo('CollegePrograms', [
+
+      'foreignKey' => 'program_id'
+
+    ]);
+
+    $this->hasMany('StudentEnrolledCourses', [
+
+      'foreignKey' => 'student_id'
+
+    ]);
+
+    $this->hasMany('StudentEnrolledUnits', [
+
+      'foreignKey' => 'student_id'
+
+    ]);
+
+    $this->hasMany('StudentEnrolledSchedules', [
+
+      'foreignKey' => 'student_id'
+
+    ]);
+
+    $this->hasMany('StudentEnrollments', [
+
+      'foreignKey' => 'student_id'
+
+    ]);
+  }
 
   public function getAllStudent($conditions, $limit, $page){
 

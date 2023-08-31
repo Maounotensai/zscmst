@@ -141,21 +141,21 @@ class ApartelleRegistrationsController extends AppController {
 
     $this->autoRender = false;
 
-    $requestData = $this->request->getData('GoodMoral');
+    $requestData = $this->request->getData('ApartelleRegistration');
 
-    $requestData['date'] = isset($requestData['date']) ? fdate($requestData['date'],'Y-m-d') : NULL;
+    $requestData['date_of_birth'] = isset($requestData['date_of_birth']) ? fdate($requestData['date_of_birth'],'Y-m-d') : NULL;
 
-    $data = $this->GoodMorals->newEmptyEntity();
+    $data = $this->ApartelleRegistrations->newEmptyEntity();
    
-    $data = $this->GoodMorals->patchEntity($data, $requestData); 
+    $data = $this->ApartelleRegistrations->patchEntity($data, $requestData); 
 
-    if ($this->GoodMorals->save($data)) {
+    if ($this->ApartelleRegistrations->save($data)) {
 
       $response = array(
 
         'ok'  =>true,
 
-        'msg' =>'Good Moral Certificate has been successfully saved.',
+        'msg' =>'Apartelle Registrations has been successfully saved.',
 
         'data'=>$requestData
 
@@ -167,7 +167,7 @@ class ApartelleRegistrationsController extends AppController {
 
           'action' => 'Add',
 
-          'description' => 'Good Moral Certificate',
+          'description' => 'Apartelle Registrations',
 
           'code' => $requestData['code'],
 
@@ -187,7 +187,7 @@ class ApartelleRegistrationsController extends AppController {
 
         'data'=>$requestData,
 
-        'msg' =>'Good Moral Certificate cannot saved this time.',
+        'msg' =>'Apartelle Registrations cannot saved this time.',
 
       );
 
@@ -211,23 +211,37 @@ class ApartelleRegistrationsController extends AppController {
 
   public function view($id = null){
 
-    $data['GoodMoral'] = $this->GoodMorals->find()
-
-      ->where([
-
-        'visible' => 1,
-
-        'id' => $id
-
+    $data['ApartelleRegistration'] = $this->ApartelleRegistrations->find()
+      ->contain([
+          'Apartelles',
+          'CollegePrograms',
+          'YearLevelTerms'
       ])
-
+      ->where([
+          'ApartelleRegistrations.visible' => 1,
+          'ApartelleRegistrations.id' => $id
+      ])
       ->first();
 
-    $data['GoodMoral']['active_view'] = $data['GoodMoral']['active'] ? 'True' : 'False';
+    $data['ApartelleRegistration']['date_of_birth'] = isset($data['ApartelleRegistration']['date_of_birth']) ? $data['ApartelleRegistration']['date_of_birth']->format('m/d/Y') : 'N/A';
 
-    $data['GoodMoral']['date'] = $data['GoodMoral']['date']->format('m/d/Y');
+    $data['CollegeProgram'] = $data['ApartelleRegistration']['college_program'];
 
-    $data['GoodMoral']['floors'] = intval($data['GoodMoral']['floors']);
+    $data['Apartelle'] = $data['ApartelleRegistration']['apartelle'];
+
+    $data['YearLevelTerm'] = $data['ApartelleRegistration']['year_level_term'];
+
+    unset($data['ApartelleRegistration']['course']);
+
+    unset($data['ApartelleRegistration']['apartelle']);
+
+    unset($data['ApartelleRegistration']['year_level_term']);
+
+    $data['ApartelleRegistration']['active_view'] = $data['ApartelleRegistration']['active'] ? 'True' : 'False';
+
+    // $data['ApartelleRegistration']['date_of_birth'] = $data['ApartelleRegistration']['date_of_birth']->format('m/d/Y');
+
+    $data['ApartelleRegistration']['floors'] = intval($data['ApartelleRegistration']['floors']);
 
     $response = [
 
@@ -255,23 +269,23 @@ class ApartelleRegistrationsController extends AppController {
 
   public function edit($id){
 
-    $building = $this->GoodMorals->get($id); 
+    $building = $this->ApartelleRegistrations->get($id); 
 
-    $requestData = $this->getRequest()->getData('GoodMoral');
+    $requestData = $this->getRequest()->getData('ApartelleRegistration');
 
-    $requestData['date'] = isset($requestData['date']) ? date('Y/m/d', strtotime($requestData['date'])) : null;
+    $requestData['date_of_birth'] = isset($requestData['date_of_birth']) ? date('Y/m/d', strtotime($requestData['date_of_birth'])) : null;
 
-    $requestData['date'] = isset($requestData['date']) ? fdate($requestData['date'],'Y-m-d') : NULL;
+    $requestData['date_of_birth'] = isset($requestData['date_of_birth']) ? fdate($requestData['date_of_birth'],'Y-m-d') : NULL;
 
-    $this->GoodMorals->patchEntity($building, $requestData); 
+    $this->ApartelleRegistrations->patchEntity($building, $requestData); 
 
-    if ($this->GoodMorals->save($building)) {
+    if ($this->ApartelleRegistrations->save($building)) {
 
       $response = array(
 
         'ok'  =>true,
 
-        'msg' =>'Good Moral Certificate has been successfully updated.',
+        'msg' =>'Apartelle Registrations has been successfully updated.',
 
         'data'=>$requestData
 
@@ -283,7 +297,7 @@ class ApartelleRegistrationsController extends AppController {
 
           'action' => 'Edit',
 
-          'description' => 'Good Moral Certificate',
+          'description' => 'Apartelle Registrations',
 
           'code' => $requestData['code'],
 
@@ -303,7 +317,7 @@ class ApartelleRegistrationsController extends AppController {
 
         'data'=>$requestData,
 
-        'msg' =>'Good Moral Certificate cannot updated this time.',
+        'msg' =>'Apartelle Registrations cannot updated this time.',
 
       );
 
@@ -331,17 +345,17 @@ class ApartelleRegistrationsController extends AppController {
 
     $this->request->allowMethod(['delete']);
 
-    $data = $this->GoodMorals->get($id);
+    $data = $this->ApartelleRegistrations->get($id);
 
     $data->visible = 0;
 
-    if ($this->GoodMorals->save($data)) {
+    if ($this->ApartelleRegistrations->save($data)) {
 
       $response = [
 
         'ok' => true,
 
-        'msg' => 'Good Moral Certificate has been successfully deleted'
+        'msg' => 'Apartelle Registrations has been successfully deleted'
 
       ];
 
@@ -351,7 +365,7 @@ class ApartelleRegistrationsController extends AppController {
 
           'action' => 'Delete',
 
-          'description' => 'Good Moral Certificate',
+          'description' => 'Apartelle Registrations',
 
           'code' => $data->code,
 
@@ -369,7 +383,7 @@ class ApartelleRegistrationsController extends AppController {
 
         'ok' => false,
 
-        'msg' => 'Good Moral Certificate cannot be deleted at this time.'
+        'msg' => 'Apartelle Registrations cannot be deleted at this time.'
 
       ];
 
@@ -389,6 +403,144 @@ class ApartelleRegistrationsController extends AppController {
 
     return $this->response;
 
+  }
+
+  public function approve($id = null){
+
+    $this->autoRender = false;
+
+    $data = $this->ApartelleRegistrations->get($id);
+
+    $data->approve = 1;
+
+    $data->approve_by_id = $this->currentUser->id;
+
+    if ($this->ApartelleRegistrations->save($data)) {
+
+      $response = [
+
+        'ok' => true,
+
+        'msg' => 'Apartelle Registrations has been successfully deleted'
+
+      ];
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'approve',
+
+          'description' => 'Apartelle Registrations',
+
+          'code' => $requestData['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+      
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = [
+
+        'ok' => false,
+
+        'msg' => 'Apartelle Registrations cannot be deleted at this time.'
+
+      ];
+
+    }
+
+    $this->set([
+
+      'response' => $response,
+
+      '_serialize' => 'response'
+
+    ]);
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+
+  } 
+
+  public function disapprove($id = null){
+
+    $this->autoRender = false;
+
+    $data = $this->ApartelleRegistrations->get($id);
+
+    $data->approve = 2;
+
+    $data->disapprove_by_id = $this->currentUser->id;
+
+    $data->disapproved_reason = $this->getRequest()->getData('explanation');
+
+    if($this->ApartelleRegistrations->save($data)){
+
+      $response = array(
+
+        'ok'   => true,
+
+        'data' => $data,       
+
+        'msg'  => 'Apartelle Registrations has been successfully disapproved.'
+
+      );
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'Disapproved',
+
+          'description' => 'Apartelle Registrations',
+
+          'code' => $data['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+      
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = array(
+
+        'ok'   => false,
+
+        'data' => $data,
+
+        'msg'  =>'Apartelle Registrations cannot be disapproved this time.'
+
+      );
+
+    }
+
+    $this->set(array(
+
+      'response'=>$response,
+
+      '_serialize'=>'response'
+
+    ));
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+    
   }
 
 }

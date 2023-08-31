@@ -103,6 +103,21 @@
                       </div>
                   </div>
 
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label> Name of Nurse <i class="required">*</i></label>
+                      <select selectize ng-options="opt.id as opt.value for opt in nurse_profile" ng-change="getNurse(data.Consultation.nurse_id)" ng-model="data.Consultation.nurse_id" data-validation-engine="validate[required]">
+                      <option value=""></option></select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label> Nurse Remarks <i class="required">*</i></label>
+                      <textarea class="form-control" autocomplete="off" ng-model="data.Consultation.nurse_remarks" data-validation-engine="validate[required]"></textarea>
+                    </div>
+                  </div>
+
               </div>
               <div class="clearfix"></div>
               <hr>

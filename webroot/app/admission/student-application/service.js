@@ -1,6 +1,6 @@
 app.factory("StudentApplication", function($resource) {
 
-  return $resource( api + "student_applications/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "student-applications/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 

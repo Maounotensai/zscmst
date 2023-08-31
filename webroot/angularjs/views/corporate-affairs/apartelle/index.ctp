@@ -104,4 +104,4 @@
   </div>
 </div>
 <?php endif ?>
-<?php echo $this->element('modals/advance-search/advance-search-date') ?>
+<!-- <?php echo $this->element('modals/advance-search/advance-search-date') ?> -->

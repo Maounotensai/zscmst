@@ -36,7 +36,7 @@ app.config(function ($routeProvider) {
 
   .when("/medical-services/consultation/student-index", {
 
-    templateUrl: tmp + "medical_services__consultation__student_index",
+    templateUrl: 'angularjs/views/medical-services/consultation/student-index.ctp',
 
     controller: "StudentConsultationController",
 
@@ -44,7 +44,7 @@ app.config(function ($routeProvider) {
 
   .when("/medical-services/consultation/student-add", {
 
-    templateUrl: tmp + "medical_services__consultation__student_add",
+    templateUrl: 'angularjs/views/medical-services/consultation/student-add.ctp',
 
     controller: "StudentConsultationAddController",
 
@@ -52,7 +52,7 @@ app.config(function ($routeProvider) {
 
   .when("/medical-services/consultation/student-edit/:id", {
 
-    templateUrl: tmp + "medical_services__consultation__student_edit",
+    templateUrl: 'angularjs/views/medical-services/consultation/student-edit.ctp',
 
     controller: "StudentConsultationEditController",
 
@@ -60,7 +60,7 @@ app.config(function ($routeProvider) {
 
   .when("/medical-services/consultation/student-view/:id", {
 
-    templateUrl: tmp + "medical_services__consultation__student_view",
+    templateUrl: 'angularjs/views/medical-services/consultation/student-view.ctp',
 
     controller: "StudentConsultationViewController",
 

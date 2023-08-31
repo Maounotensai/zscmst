@@ -131,7 +131,7 @@
                   <button href="javascript:void(0)" ng-click="disapprove(data.ScholarshipApplication)" ng-disabled="data.ScholarshipApplication.approve == 2 || data.ScholarshipApplication.approve == 4" class="btn btn-danger  btn-min" ><i class="fa fa-close"></i> DISAPPROVE </button>
                 <?php endif ?>
                 <?php if (hasAccess('scholarship application/edit', $currentUser)): ?>
-                <a href="#/registrar/admin-scholarship-application/edit/{{ data.ScholarshipApplication.id }}" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </a>
+                <a href="#/admission/admin-scholarship-application/edit/{{ data.ScholarshipApplication.id }}" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </a>
                 <?php endif ?>
                 <?php if (hasAccess('scholarship application/print application form', $currentUser)): ?>
                 <button type="button" class="btn btn-info  btn-min" ng-click="print(data.ScholarshipApplication.id )"><i class="fa fa-print"></i> PRINT SCHOLARSHIP APPLICATION FORM </button>

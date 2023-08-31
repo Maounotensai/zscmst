@@ -13,7 +13,7 @@
                   <input disabled type="text" class="form-control" ng-model="data.Consultation.code">
                 </div>
               </div>
-              <div class="col-md-6">
+<!--               <div class="col-md-6">
                 <div class="form-group">
                   <label> CLASSIFICATION <i class="required">*</i></label>
                   <select class="form-control" autocomplete="false" ng-model="data.Consultation.classification" ng-change="getMember(data.Consultation.classification)" ng-init="data.Consultation.classification = 'Student'" data-validation-engine="validate[required]">
@@ -21,7 +21,7 @@
                     <option value="Employee">Employee</option>
                   </select>
                 </div>
-              </div>
+              </div> -->
 
               <div class="col-md-6" ng-show="data.Consultation.classification == 'Student'">
                 <div class="form-group">
@@ -177,7 +177,7 @@
   </div>
 </div>
 </div>
-<?php echo $this->element('modals/search/searched-student-modal') ?>
+<!-- <?php echo $this->element('modals/search/searched-student-modal') ?> -->
 
 <style type="text/css">
 th {

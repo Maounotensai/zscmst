@@ -4,7 +4,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/subject-masterlists', {
 
-    templateUrl: tmp + 'reports__registrar__subject_masterlists',
+    templateUrl: 'angularjs/views/reports/registrar/subject-masterlists.ctp',
 
     controller: 'SubjectMasterlistController',
 
@@ -12,7 +12,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/enrollment-list', {
 
-    templateUrl: tmp + 'reports__registrar__enrollment_list',
+    templateUrl: 'angularjs/views/reports/registrar/enrollment-list.ctp',
 
     controller: 'EnrollmentListReportController',
 
@@ -20,7 +20,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/student-masterlist', {
 
-    templateUrl: tmp + 'reports__registrar__student_masterlist',
+    templateUrl: 'angularjs/views/reports/registrar/student-masterlist.ctp',
 
     controller: 'ListStudentController',
 
@@ -28,7 +28,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/student-ranking', {
 
-    templateUrl: tmp + 'reports__registrar__student_ranking',
+    templateUrl: 'angularjs/views/reports/registrar/student-ranking.ctp',
 
     controller: 'StudentRankingController',
 
@@ -36,7 +36,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/promoted-student', {
 
-    templateUrl: tmp + 'reports__registrar__promoted_student',
+    templateUrl: 'angularjs/views/reports/registrar/promoted-student.ctp',
 
     controller: 'PromotedStudentController',
 
@@ -44,7 +44,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/student-behavior', {
 
-    templateUrl: tmp + 'reports__registrar__student_behavior',
+    templateUrl: 'angularjs/views/reports/registrar/student-behavior.ctp',
 
     controller: 'StudentBehaviorReportController',
 
@@ -52,7 +52,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/academic-failures-list', {
 
-    templateUrl: tmp + 'reports__registrar__academic_failures_list', 
+    templateUrl: 'angularjs/views/reports/registrar/academic-failures-list.ctp', 
 
     controller: 'AcademicFailuresListController', 
 
@@ -60,7 +60,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/student-club-list', {
 
-    templateUrl: tmp + 'reports__registrar__student_club_list', 
+    templateUrl: 'angularjs/views/reports/registrar/student-club-list.ctp', 
 
     controller: 'StudentClubListController', 
 
@@ -68,7 +68,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/academic-list', {
 
-    templateUrl: tmp + 'reports__registrar__academic_list',
+    templateUrl: 'angularjs/views/reports/registrar/academic-list.ctp',
 
     controller: 'AcademicListController',
 
@@ -76,7 +76,7 @@ app.config(function($routeProvider) {
   
   .when('/reports/registrar/list-academic-awardees', {
 
-    templateUrl: tmp + 'reports__registrar__list_academic_awardees',
+    templateUrl: 'angularjs/views/reports/registrar/list-academic-awardees.ctp',
 
     controller: 'ListAcademicAwardeeController',
 
@@ -84,7 +84,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/gwa', {
 
-    templateUrl: tmp + 'reports__registrar__gwa',
+    templateUrl: 'angularjs/views/reports/registrar/gwa.ctp',
 
     controller: 'GWAController',
 
@@ -92,7 +92,7 @@ app.config(function($routeProvider) {
 
   .when('/reports/registrar/enrollment-profile', {
 
-    templateUrl: tmp + 'reports__registrar__enrollment_profile',
+    templateUrl: 'angularjs/views/reports/registrar/enrollment-profile.ctp',
 
     controller: 'EnrollmentProfileController',
 

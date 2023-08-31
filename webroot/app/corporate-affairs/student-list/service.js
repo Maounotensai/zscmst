@@ -1,6 +1,6 @@
  app.factory("StudentList", function($resource) {
 
-  return $resource( api + "apartelle_registrations/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "ApartelleRegistrations/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -14,7 +14,7 @@
 
  app.factory("StudentListEmail", function($resource) {
 
-  return $resource( api + "student_applications/email/:id", { id: '@id' }, {
+  return $resource( api + "StudentApplications/email/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 

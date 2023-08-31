@@ -81,7 +81,7 @@
           <div class="col-md-12">
             <div class="pull-right">
              
-              <a href="#/medical-services/student-consultation/edit/{{ data.Consultation.id }}" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </a>
+              <a href="#/medical-services/consultation/student-edit/{{ data.Consultation.id }}" class="btn btn-primary btn-min"><i class="fa fa-edit"></i> EDIT </a>
   
               <button type="button" class="btn btn-info  btn-min" ng-click="print(data.Consultation.id )"><i class="fa fa-print"></i> PRINT CONSULTATION </button>
  

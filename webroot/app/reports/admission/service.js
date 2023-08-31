@@ -14,7 +14,7 @@
 
 app.factory("ListApplicant", function($resource) {
 
-  return $resource( api + "reports/list_applicants/:id", { id: '@id', search: '@search' }, {
+  return $resource( api + "Reports/list_applicants/:id", { id: '@id', search: '@search' }, {
 
     query: { method: 'GET', isArray: false },
 

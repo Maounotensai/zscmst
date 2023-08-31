@@ -21,6 +21,12 @@ class ApartellesController extends AppController {
 
     $this->Apartelles = TableRegistry::getTableLocator()->get('Apartelles');
 
+    $this->ApartelleImages = TableRegistry::getTableLocator()->get('ApartelleImages');
+
+     $this->UserLogs = TableRegistry::getTableLocator()->get('UserLogs');
+
+     $this->autoRender = false;
+
   }
 
   public function index(){   
@@ -136,64 +142,117 @@ class ApartellesController extends AppController {
   public function add(){
 
     $this->autoRender = false;
+    if ($this->request->is(['post', 'ajax']) && $this->request->is('json')) {
 
-    $requestData = $this->request->getData('Apartelle');
+      $requestData = $this->request->getData('data');
 
-    $data = $this->Apartelles->newEmptyEntity();
-   
-    $data = $this->Apartelles->patchEntity($data, $requestData); 
+      $main = json_decode($requestData, true);
 
-    if ($this->Apartelles->save($data)) {
+    $uploadedFiles = $this->request->getUploadedFiles();
 
-      $response = array(
+    $apartelleEntity = $this->Apartelles->newEntity($main['Apartelle']);
 
-        'ok'  =>true,
+    $save = $this->Apartelles->save($apartelleEntity);
 
-        'msg' =>'Apartelles has been successfully saved.',
+    if ($save) {
 
-        'data'=>$requestData
+        $id = $save->id;
 
-      );
+        // var_dump($id);
 
-      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
-        
-      $userLogEntity = $userLogTable->newEntity([
+            // $id = $this->Apartelles->getLastInsertId();
+
+            foreach ($uploadedFiles as $fieldName => $images) {
+
+                $path = "uploads/apartelle/$id";
+
+                if (!file_exists($path)) {
+
+                    mkdir($path, 0777, true);
+
+                }
+
+                foreach ($images as $ctr => $image) {
+
+                    $filename = $image->getClientFilename();
+
+                    $image->moveTo($path . '/' . $filename);
+
+
+                    $names[$ctr] = $filename;
+                }
+
+            }
+
+
+            $newPRImage = @$_FILES['attachment']['name'];
+
+            // var_dump($newPRImage);
+
+            $datasImages = [];
+
+
+            if (!empty($newPRImage)) {
+
+                if (isset($main['ApartelleImage'])) {
+
+                  // var_dump($main);
+
+                    foreach ($main['ApartelleImage'][count($main['ApartelleImage']) - 1]['images'] as $key => $valueImages) {
+
+                        $valueImages['images'] = $names[$key];
+
+                        $valueImages['apartelle_id'] = $id;
+
+                        $datasImages[] = $valueImages;
+
+                    }
+
+                    $entities = $this->ApartelleImages->newEntities($datasImages);
+
+                     $this->ApartelleImages->saveMany($entities);
+
+                }
+            }
+
+            $response = [
+                'ok' => true,
+                'msg' => 'Apartelle/Dormitory has been successfully saved.',
+                'data' => $requestData,
+            ];
+
+          $userLogEntity = $this->UserLogs->newEntity([
 
           'action' => 'Add',
 
-          'description' => 'Apartelle Management',
-
-          'code' => $requestData['code'],
+          'description' => 'Student Applciation Management',
 
           'created' => date('Y-m-d H:i:s'),
 
           'modified' => date('Y-m-d H:i:s')
 
-      ]);
-      
-      $userLogTable->save($userLogEntity);
+        ]);
 
-    }else {
+        $this->UserLogs->save($userLogEntity);
 
-      $response = array(
+    }else{
 
-        'ok'  =>true,
-
-        'data'=>$requestData,
-
-        'msg' =>'Apartelles cannot saved this time.',
-
-      );
+                $response = [
+              'ok' => false,
+              'data' => $requestData,
+              'msg' => 'Apartelle/Dormitory cannot be saved at this time.',
+          ];
 
     }
+    
+    $this->set([
 
-    $this->set(array(
+        'response' => $response,
 
-      'response'=>$response,
+        '_serialize' => 'response'
 
-      '_serialize'=>'response'
+      ]);
 
-    ));
 
     $this->response->withType('application/json');
 
@@ -201,31 +260,63 @@ class ApartellesController extends AppController {
 
     return $this->response;
 
+    }
   }
 
   public function view($id = null){
 
-    $data['Apartelle'] = $this->Apartelles->find()
-
-      ->where([
-
-        'visible' => 1,
-
-        'id' => $id
-
+    $data['Apartelle'] = $this->Apartelles
+      ->find()
+      ->contain([
+          'ApartelleImages' => [
+              'conditions' => ['ApartelleImages.visible' => 1]
+          ]
       ])
-
+      ->where([
+          'Apartelles.visible' => 1,
+          'Apartelles.id' => $id
+      ])
       ->first();
 
     $data['Apartelle']['active_view'] = $data['Apartelle']['active'] ? 'True' : 'False';
 
     $data['Apartelle']['floors'] = intval($data['Apartelle']['floors']);
 
+    $data['ApartelleImage'] = $data['Apartelle']['apartelle_images'];
+
+    unset($data['Apartelle']['apartelle_images']);
+
+    $apartelleImage = array();
+    
+
+    if(!empty($data['ApartelleImage'])){
+
+      foreach($data['ApartelleImage'] as $key => $image){
+
+        if (!is_null($image['images'])) {
+
+          $apartelleImage[] = array(
+
+            'imageSrc' => $this->base . 'uploads/apartelle/' . $id . '/' . @$image['images'],
+
+            'name' => @$image['images'],
+
+            'id' => @$image['id'],
+
+          );
+
+        }
+
+      }
+    }
+
     $response = [
 
       'ok' => true,
 
-      'data' => $data
+      'data' => $data,
+
+      'apartelleImage' => $apartelleImage
 
     ];
 
@@ -241,75 +332,70 @@ class ApartellesController extends AppController {
 
     $this->response->getBody()->write(json_encode($response));
 
-    return $this->response;
+    return $this->response; 
 
   }
 
   public function edit($id){
 
-    $building = $this->Apartelles->get($id); 
+    $apartelle = $this->Apartelles->get($id);
 
     $requestData = $this->getRequest()->getData('Apartelle');
 
-    $requestData['date'] = isset($requestData['date']) ? date('Y/m/d', strtotime($requestData['date'])) : null;
+    $this->Apartelles->patchEntity($apartelle, $requestData);
 
-    $this->Apartelles->patchEntity($building, $requestData); 
+    if ($this->Apartelles->save($apartelle)) {
 
-    if ($this->Apartelles->save($building)) {
+        $response = [
 
-      $response = array(
+            'ok' => true,
 
-        'ok'  =>true,
+            'msg' => 'Apartelle has been successfully updated.',
 
-        'msg' =>'Apartelles has been successfully updated.',
+            'data' => $requestData,
 
-        'data'=>$requestData
+        ];
 
-      );
-        
-      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
-        
-      $userLogEntity = $userLogTable->newEntity([
+        $userLogEntity = $this->UserLogs->newEntity([
 
-          'action' => 'Edit',
+            'action' => 'Edit',
 
-          'description' => 'Apartelle Management',
+            'description' => 'Apartelle Management',
 
-          'code' => $requestData['code'],
+            'created' => date('Y-m-d H:i:s'),
 
-          'created' => date('Y-m-d H:i:s'),
+            'modified' => date('Y-m-d H:i:s'),
 
-          'modified' => date('Y-m-d H:i:s')
+        ]);
 
-      ]);
-      
-      $userLogTable->save($userLogEntity);
 
-    }else {
+        $this->UserLogs->save($userLogEntity);
 
-      $response = array(
+    } else {
 
-        'ok'  =>true,
+        $response = [
 
-        'data'=>$requestData,
+            'ok' => false,
 
-        'msg' =>'Apartelles cannot updated this time.',
+            'msg' => 'Apartelle cannot be updated at this time.',
 
-      );
+            'data' => $requestData,
+
+        ];
 
     }
 
-    $this->set(array(
+    $this->set([
 
-      'response'=>$response,
+        'response' => $response,
 
-      '_serialize'=>'response'
+        '_serialize' => 'response',
 
-    ));
+    ]);
 
-    $this->response->withType('application/json');
+    $this->response = $this->response->withType('application/json');
 
-    $this->response->getBody()->write(json_encode($response));
+    $this->response = $this->response->withStringBody(json_encode($response));
 
     return $this->response;
 
@@ -380,5 +466,80 @@ class ApartellesController extends AppController {
     return $this->response;
 
   }
+
+  public function deleteImage($id = null) {
+
+    $data = $this->ApartelleImages->get($id);
+
+    $data->visible = 0;
+
+    if ($this->ApartelleImages->save($data)) {
+
+      $path = "uploads/apartelle/" . @$data['apartelle_id'];
+
+      $orgfile = $path . '/' . @$data['images'];
+
+      if(file_exists($orgfile)){
+
+        unlink(@$orgfile);
+
+      }
+
+      $response = array(
+
+        'ok'   => true,
+
+        'data' => $id,
+
+        'msg' => 'File has been deleted.'
+
+      );
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'Delete Image',
+
+          'description' => 'Apartelle Management',
+
+          'code' => $data->code,
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+      
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = array(
+
+        'ok'   => false,
+
+        'data' => $id,
+
+      );
+
+    }
+
+    $this->set(array(
+
+      'response'   => $response,
+
+      '_serialize' => 'response'
+
+    ));
+
+        $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+
+  }
+   
 
 }

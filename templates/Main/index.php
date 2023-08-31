@@ -2,10 +2,32 @@
 <div class="container body">
   <div class="main_container">
 
-  
-    <?php echo $this->element('sidebar') ?>
+    <?php if($currentUser['role']['code'] == 'Student'){  ?>
+        
+      <?php echo $this->element('sidebar-student'); ?>
+    
+    <?php }elseif($currentUser['role']['code'] == 'Enrollee'){ ?>
 
-  
+      <?php echo $this->element('sidebar-enrollee') ?>
+
+    <?php }else if ($currentUser['role']['code'] == 'Dean') { ?>
+
+      <?php echo $this->element('sidebar-dean') ?>
+
+    <?php }else if ($currentUser['role']['code'] == 'Vice President') { ?>
+
+      <?php echo $this->element('sidebar-vice') ?>
+
+    <?php }else if ($currentUser['role']['code'] == 'Faculty') { ?>
+
+      <?php echo $this->element('sidebar-faculty') ?>
+
+    <?php }else{ ?>
+
+      <?php echo $this->element('sidebar') ?>
+
+    <?php }?>
+
     <?php echo $this->element('topnav') ?>
 
     <div class="right_col" role="main">

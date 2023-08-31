@@ -499,7 +499,6 @@
       <div class="modal-body">
         <form id="requirement_form">  
           <div class="col-md-12">        
-          
             <div class="row">
               <div class="col-md-12 text-center" ng-show=" grade == 0"><h5 class="text-center text-danger"> NO GRADE</h5></div>
               <div class="col-md-6 text-center"  ng-show=" grade !== 0"><h5 class="text-center"> GWA is  <strong><u>{{grade}}</u></strong></h5></div>
@@ -517,8 +516,8 @@
                   </thead>
                   <tbody>
                     <tr ng-repeat = "data in StudentEnrolledCourse">
-                      <td class="text-center uppercase"> {{data.StudentEnrolledCourse.course_code}}</td>
-                      <td class="text-center">{{data.StudentEnrolledCourse.final_grade}}</td>
+                      <td class="text-center uppercase"> {{data.course_code}}</td>
+                      <td class="text-center">{{data.final_grade}}</td>
                     </tr>
                     <tr ng-show="StudentEnrolledCourse == null || StudentEnrolledCourse == ''">
                       <td class="text-center" colspan="2">No data available.</td>
@@ -533,7 +532,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger btn-sm btn-min" data-dismiss="modal"><i class="fa fa-close"></i> CLOSE </button>
-        <a href="javascript:void(0)" ng-click="requestData(ScholarshipApplication );" class="btn btn-info" title="REQUEST"><i class="fa fa-envelope-o"></i> Request data</a>
+        <a href="javascript:void(0)" ng-click="requestData(ScholarshipApplication);" class="btn btn-info" title="REQUEST"><i class="fa fa-envelope-o"></i> Request data</a>
       </div>
     </div>
   </div>

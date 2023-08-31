@@ -1,6 +1,10 @@
-app.factory("StudentApplicationRate", function($resource) {
+app.factory("StudentApplicationRate", function($resource, $http) {
 
-  return $resource( api + "student_applications/rate/:id", { id: '@id' }, {
+  var csrfToken = angular.element(document.querySelector('meta[name="csrf-token"]')).attr('content');
+  
+  $http.defaults.headers.common['X-CSRF-Token'] = csrfToken;
+
+  return $resource( api + "StudentApplications/rate/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -14,7 +18,7 @@ app.factory("StudentApplicationRate", function($resource) {
 
 app.factory("StudentApplicationEmail", function($resource) {
 
-  return $resource( api + "student_applications/email/:id", { id: '@id' }, {
+  return $resource( api + "StudentApplications/email/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -28,7 +32,7 @@ app.factory("StudentApplicationEmail", function($resource) {
 
 app.factory("StudentApplicationSchedule", function($resource) {
 
-  return $resource( api + "student_applications/send_schedule/:id", { id: '@id' }, {
+  return $resource( api + "StudentApplications/send_schedule/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -40,7 +44,11 @@ app.factory("StudentApplicationSchedule", function($resource) {
 
 });
 
-app.factory("StudentApplicationBulkEmail", function($resource) {
+app.factory("StudentApplicationBulkEmail", function($resource, $http) {
+
+  var csrfToken = angular.element(document.querySelector('meta[name="csrf-token"]')).attr('content');
+  
+  $http.defaults.headers.common['X-CSRF-Token'] = csrfToken;
 
   return $resource( api + "student_applications/bulk_email/:id", { id: '@id' }, {
 

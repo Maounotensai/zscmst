@@ -4,7 +4,7 @@ app.config(function($routeProvider) {
 
   .when('/registrar/prospectus', {
 
-    templateUrl: tmp + 'registrar__prospectus__index',
+    templateUrl: 'angularjs/views/registrar/prospectus/index.ctp',
 
     controller: 'ProspectusController',
 
@@ -12,7 +12,7 @@ app.config(function($routeProvider) {
 
   .when("/registrar/prospectus/view/:id", {
  
-    templateUrl: tmp + "registrar__prospectus__view",
+    templateUrl: "angularjs/views/registrar/prospectus/view.ctp",
  
     controller: "ProspectusViewController",
  
@@ -20,7 +20,7 @@ app.config(function($routeProvider) {
 
   .when("/registrar/prospectus/view-student/:id", {
  
-    templateUrl: tmp + "registrar__prospectus__view_student",
+    templateUrl: "angularjs/views/registrar/prospectus/view-student.ctp",
  
     controller: "ProspectusStudentViewController",
  

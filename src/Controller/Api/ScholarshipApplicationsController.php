@@ -22,6 +22,10 @@ class ScholarshipApplicationsController extends AppController {
 
     $this->ScholarshipApplication = TableRegistry::getTableLocator()->get('ScholarshipApplications');
 
+    $this->ScholarshipName = TableRegistry::getTableLocator()->get('ScholarshipNames');
+
+    $this->Student = TableRegistry::getTableLocator()->get('Students');
+
     $this->UserLogs = TableRegistry::getTableLocator()->get('UserLogs');
 
   }
@@ -49,9 +53,9 @@ class ScholarshipApplicationsController extends AppController {
 
     $conditions['date'] = '';
 
-    if (isset($this->request->query['date'])) {
+    if ($this->request->getQuery('date')) {
 
-      $search_date = $this->request->query['date'];
+      $search_date = $this->request->getQuery('date');
 
       $conditions['date'] = " AND DATE(ScholarshipApplication.date) = '$search_date'"; 
 
@@ -63,11 +67,11 @@ class ScholarshipApplicationsController extends AppController {
 
     //advance search
 
-    if (isset($this->request->query['startDate'])) {
+    if ($this->request->getQuery('startdate')) {
 
-      $start = $this->request->query['startDate']; 
+      $start = $this->request->getQuery('startdate'); 
 
-      $end = $this->request->query['endDate'];
+      $end = $this->request->getQuery('endDate');
 
       $conditions['date'] = " AND DATE(ScholarshipApplication.date) >= '$start' AND DATE(ScholarshipApplication.date) <= '$end'";
 
@@ -177,6 +181,10 @@ class ScholarshipApplicationsController extends AppController {
 
     $requestData = $this->request->getData('ScholarshipApplication');
 
+    $requestData['date'] = isset($requestData['date']) ? fdate($requestData['date'],'Y-m-d') : null;
+
+    $requestData['birthdate'] = isset($requestData['birthdate']) ? fdate($requestData['birthdate'],'Y-m-d') : null;
+
     $data = $this->ScholarshipApplication->newEmptyEntity();
    
     $data = $this->ScholarshipApplication->patchEntity($data, $requestData); 
@@ -248,31 +256,38 @@ class ScholarshipApplicationsController extends AppController {
         'Students',
         
         'CollegePrograms',
+
+        'YearLevelTerms',
+
+        'Schools' => ['fields' => ['school_name']],
         
-        'Schools' => ['fields' => 'school_name'],
-        
-        'ScholarshipNames' => ['fields' => 'scholarship_name']
+        'ScholarshipNames' => ['fields' => ['scholarship_name']]
         
     ])
     
     ->where([
       
-        'ScholarshipApplication.visible' => true,
+        'ScholarshipApplications.visible' => 1,
         
-        'ScholarshipApplication.id' => $id
+        'ScholarshipApplications.id' => $id
         
     ])
     
     ->first();
 
+    $data['ScholarshipApplication']['date'] = isset($data['ScholarshipApplication']['date']) ? date('m/d/Y', strtotime($data['ScholarshipApplication']['date'])) : null;
+
+    $data['ScholarshipApplication']['birthdate'] = isset($data['ScholarshipApplication']['birthdate']) ? date('m/d/Y', strtotime($data['ScholarshipApplication']['birthdate'])) : null;
+
     $data['Student'] = $data['ScholarshipApplication']['student'];
 
     $data['CollegeProgram'] = $data['ScholarshipApplication']['college_program'];
 
-    $data['School'] = $data['ScholarshipApplication']['school'];
+    $data['ScholarshipApplication']['name_of_school'] = $data['ScholarshipApplication']['school']['school_name'];
 
     $data['ScholarshipName'] = $data['ScholarshipApplication']['scholarship_name'];
 
+    $data['ScholarshipApplication']['year'] = $data['ScholarshipApplication']['year_level_term']['description'];
 
     unset($data['ScholarshipApplication']['student']);
 
@@ -281,6 +296,8 @@ class ScholarshipApplicationsController extends AppController {
     unset($data['ScholarshipApplication']['school']);
 
     unset($data['ScholarshipApplication']['scholarship_name']);
+
+    unset($data['ScholarshipApplication']['year_level_term']);
 
     $response = [
 
@@ -312,8 +329,10 @@ class ScholarshipApplicationsController extends AppController {
     $ScholarshipApplication = $this->ScholarshipApplication->get($id); 
 
     $requestData = $this->getRequest()->getData('ScholarshipApplication');
-    // var_dump($requestData);
-    $requestData['date'] = isset($requestData['date']) ? date('Y/m/d', strtotime($requestData['date'])) : null;
+
+    $requestData['date'] = isset($requestData['date']) ? fdate($requestData['date'],'Y-m-d') : null;
+
+    $requestData['birthdate'] = isset($requestData['birthdate']) ? fdate($requestData['birthdate'],'Y-m-d') : null;
 
     $data = $this->ScholarshipApplication->patchEntity($ScholarshipApplication, $requestData); 
 
@@ -325,7 +344,7 @@ class ScholarshipApplicationsController extends AppController {
 
         'ok'  =>true,
 
-        'msg' =>'ScholarshipApplication has been successfully updated.',
+        'msg' =>'Scholarship Application has been successfully updated.',
 
         'data'=>$requestData
 
@@ -335,7 +354,7 @@ class ScholarshipApplicationsController extends AppController {
 
           'action' => 'Edit',
 
-          'description' => 'ScholarshipApplication Management',
+          'description' => 'Scholarship Application Management',
 
           'created' => date('Y-m-d H:i:s'),
 
@@ -422,5 +441,537 @@ class ScholarshipApplicationsController extends AppController {
     return $this->response;
 
   }
+
+  public function approve($id = null){
+    $this->autoRender = false;
+
+    $data = $this->ScholarshipApplication->get($id);
+
+    $data->approve = 1;
+
+    $data->approve_by_id = $this->currentUser->id;
+
+    if($this->ScholarshipApplication->save($data)){
+
+      //EMAIL VERIFICATION
+
+        $student = $this->Student->get($data['student_id']);
+
+        $name = $student['first_name'].' '.substr($student['middle_name'],0,1).'. '.$student['last_name'];
+
+        $email = $student['email'];
+
+        // if(isset($email)){
+
+        //   if(!empty($email)){
+
+        //     if($email != ''){
+
+        //       $Email = new CakeEmail();
+
+        //       $Email->emailFormat('html');
+
+        //       $Email->template('scholarship-application-approve', 'mytemplate');
+
+        //       $_SESSION['name'] = @$name; 
+
+        //       $_SESSION['code'] = @$app['ScholarshipApplication']['code']; 
+
+        //       $_SESSION['student_no'] = @$app['ScholarshipApplication']['student_no']; 
+
+        //       $_SESSION['type'] = @$app['ScholarshipApplication']['scholarship_type']; 
+
+        //       $_SESSION['id'] = $id; 
+
+        //       $Email->to($email, $name);
+
+        //       $Email->subject('Scholarship Application Status');
+
+        //       $Email->from(array($this->Global->Settings('email') => 'ESMIS'));
+
+        //       $Email->send();
+
+        //     }
+
+        //   }
+
+        // }
+
+      //EMAIL VERIFICATION
+
+      $response = array(
+
+        'ok'   => true,
+
+        'data' => $data,       
+
+        'msg'  => 'Scholarship Application has been successfully approved.'
+
+      );
+
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'approve',
+
+          'description' => 'Scholarship Application',
+
+          'code' => $data['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = array(
+
+        'ok'   => false,
+
+        'data' => $data,
+
+        'msg'  =>'Scholarship Application cannot be approved this time.'
+
+      );
+
+    }
+
+    $this->set(array(
+
+      'response'=>$response,
+
+      '_serialize'=>'response'
+
+    ));
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+
+  }
+
+  public function confirm($id = null){
+
+    $this->autoRender = false;
+
+    $data = $this->ScholarshipApplication->get($id);
+
+    $data->approve = 4;
+
+    $data->approve_by_id = $this->currentUser->id;
+
+    if($this->ScholarshipApplication->save($data)){
+
+      //EMAIL VERIFICATION
+
+        $student = $this->Student->get($data['student_id']);
+
+        $name = $student['first_name'].' '.substr($student['middle_name'],0,1).'. '.$student['last_name'];
+
+        $email = $student['email'];
+
+        // if(isset($email)){
+
+        //   if(!empty($email)){
+
+        //     if($email != ''){
+
+        //       $Email = new CakeEmail();
+
+        //       $Email->emailFormat('html');
+
+        //       $Email->template('scholarship-application-confirm', 'mytemplate');
+
+        //       $_SESSION['name'] = @$name; 
+
+        //       $_SESSION['code'] = @$app['ScholarshipApplication']['code']; 
+
+        //       $_SESSION['student_no'] = @$app['ScholarshipApplication']['student_no']; 
+
+        //       $_SESSION['type'] = @$app['ScholarshipApplication']['scholarship_type']; 
+
+        //       $_SESSION['id'] = $id; 
+
+        //       $Email->to($email, $name);
+
+        //       $Email->subject('Scholarship Application Status');
+
+        //       $Email->from(array($this->Global->Settings('email') => 'ESMIS'));
+
+        //       $Email->send();
+
+        //     }
+
+        //   }
+
+        // }
+
+      //EMAIL VERIFICATION
+
+      $response = array(
+
+        'ok'   => true,
+
+        'data' => $data,       
+
+        'msg'  => 'Scholarship Application has been successfully confirmed.'
+
+      );
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'approve',
+
+          'description' => 'Scholarship Application',
+
+          'code' => $data['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = array(
+
+        'ok'   => false,
+
+        'data' => $data,
+
+        'msg'  =>'Counseling Appointment cannot be confirmed this time.'
+
+      );
+
+    }
+
+    $this->set(array(
+
+      'response'=>$response,
+
+      '_serialize'=>'response'
+
+    ));
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+
+  } 
+
+  public function disapprove($id = null){
+
+    $this->autoRender = false;
+
+    $data = $this->ScholarshipApplication->get($id);
+
+     $data->approve = 2;
+
+    $data->disapprove_by_id = $this->currentUser->id;
+
+    $data->disapproved_reason = $this->getRequest()->getData('explanation');
+
+    if($this->ScholarshipApplication->save($data)){
+
+      //EMAIL VERIFICATION
+
+        $student = $this->Student->get($data['student_id']);
+
+        $name = $student['first_name'].' '.substr($student['middle_name'],0,1).'. '.$student['last_name'];
+
+        $email = $student['email'];
+
+        // if(isset($email)){
+
+        //   if(!empty($email)){
+
+        //     if($email != ''){
+
+        //       $Email = new CakeEmail();
+
+        //       $Email->emailFormat('html');
+
+        //       $Email->template('scholarship-application-disapprove', 'mytemplate');
+
+        //       $_SESSION['name'] = @$name; 
+
+        //       $_SESSION['code'] = @$app['ScholarshipApplication']['code']; 
+
+        //       $_SESSION['student_no'] = @$app['ScholarshipApplication']['student_no']; 
+
+        //       $_SESSION['type'] = @$app['ScholarshipApplication']['scholarship_type']; 
+
+        //       $_SESSION['disapproved_reason'] = $data['disapproved_reason']; 
+
+        //       $_SESSION['id'] = $id; 
+
+        //       $Email->to($email, $name);
+
+        //       $Email->subject('Scholarship Application Status');
+
+        //       $Email->from(array($this->Global->Settings('email') => 'ESMIS'));
+
+        //       $Email->send();
+
+        //     }
+
+        //   }
+
+        // }
+
+      //EMAIL VERIFICATION
+
+      $response = array(
+
+        'ok'   => true,
+
+        'data' => $data,       
+
+        'msg'  => 'Scholarship Application has been successfully disapproved.'
+
+      );
+
+
+      $userLogTable = TableRegistry::getTableLocator()->get('UserLogs');
+        
+      $userLogEntity = $userLogTable->newEntity([
+
+          'action' => 'Disapproved',
+
+          'description' => 'Attendance to Counseling',
+
+          'code' => $data['code'],
+
+          'created' => date('Y-m-d H:i:s'),
+
+          'modified' => date('Y-m-d H:i:s')
+
+      ]);
+      
+      $userLogTable->save($userLogEntity);
+
+    } else {
+
+      $response = array(
+
+        'ok'   => false,
+
+        'data' => $data,
+
+        'msg'  =>'Scholarship Application cannot be disapproved this time.'
+
+      );
+
+    }
+
+    $this->set(array(
+
+      'response'=>$response,
+
+      '_serialize'=>'response'
+
+    ));
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+    
+  }
+
+  public function viewGrade($id = null){
+
+    $data['ScholarshipApplication'] = $this->ScholarshipApplication->find()
+      ->contain([
+
+          'Students'
+
+      ])
+
+      ->where([
+
+          'Students.visible' => 1,
+
+          'ScholarshipApplications.visible' => 1,
+
+          'ScholarshipApplications.id' => $id
+
+      ])
+
+      ->first();
+
+
+    $data['ScholarshipApplication']['year_term_id'] = isset($data['ScholarshipApplication']['year_term_id']) ? $data['ScholarshipApplication']['year_term_id'] : '';
+
+    $year = $data['ScholarshipApplication']['year_term_id'];
+
+    $studentId = $data['ScholarshipApplication']['student_id'];
+
+
+    $data['StudentEnrolledCourse'] = "
+
+        SELECT StudentEnrolledCourse.* FROM
+
+          student_enrolled_courses as StudentEnrolledCourse
+
+        WHERE
+
+          StudentEnrolledCourse.visible = true AND StudentEnrolledCourse.year_term_id = $year AND StudentEnrolledCourse.student_id = $studentId
+
+      ";
+
+    $connection = $this->ScholarshipApplication->getConnection();
+
+    $result = $connection->execute($data['StudentEnrolledCourse'])->fetchAll('assoc');
+
+    $data['StudentEnrolledCourse'] = $result;
+
+    $gwa = 0.0;
+
+    $counter = 0;
+
+    foreach ($result as $key => $value) {
+
+      $gwa+=$result[$key]['final_grade'];
+
+      $result[$key]['final_grade'] = isset($result[$key]['final_grade']) ? $result[$key]['final_grade'] : 'N/A';
+
+      $counter+=1;
+
+    }
+
+    if($counter == 0 || $gwa == 0){
+
+      $gwa = 0;
+
+    }
+
+    else{
+
+          $gwa = $gwa/$counter;
+
+    }
+
+    $data['grade'] = $gwa;
+
+    $data['date_of_birth'] = isset($data['date_of_birth']) ? fdate($data['date_of_birth'], 'm/d/Y') : 'N/A';
+
+    $response = array(
+
+      'ok'   => true,
+
+      'data' => $data,
+
+    );
+      
+    $this->set(array(
+
+      'response'   => $response,
+
+      '_serialize' => 'response'
+
+   ));
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+  }
+
+
+  public function requestData($id = null,$name=null){
+    $this->autoRender = false;
+
+    $data = $this->ScholarshipApplication->get($id);
+
+    $student = $this->Student->get($data['student_id']);
+
+    $ScholarshipName = $this->ScholarshipName->get($data['scholarship_name_id']);
+    // EMAIL
+    $name = $student['first_name'].' '.substr($student['middle_name'],0,1).'. '.$student['last_name'];
+
+    $email = $data['email'];
+
+    // if(isset($email)){
+
+    //   if(!empty($email)){
+
+    //     if($email != ''){
+
+    //       $Email = new CakeEmail();
+
+    //       $Email->emailFormat('html');
+
+    //       $Email->template('scholarship-requirement', 'mytemplate');
+
+    //       $_SESSION['name'] = @$name; 
+
+    //       $_SESSION['code'] = @$app['ScholarshipApplication']['code']; 
+
+    //       $_SESSION['student_no'] = @$app['ScholarshipApplication']['student_no']; 
+
+    //       $_SESSION['name'] = @$app['ScholarshipApplication']['student_name']; 
+
+    //       $_SESSION['type'] = $ScholarshipName['ScholarshipName']['scholarship_name']; 
+
+    //       $_SESSION['id'] = $id; 
+
+    //       $Email->to($email, $name);
+
+    //       $Email->subject('Scholarship Application Requirements');
+
+    //       $Email->from(array($this->Global->Settings('email') => 'ESMIS'));
+
+    //       $Email->send();
+
+    //     }
+
+    //   }
+
+    // }
+
+    //EMAIL
+
+    $response = array(
+
+      'ok'   => true,
+
+      'data' => $data,       
+
+      'msg'  => 'Scholarship Requirements has been successfully Requested.'
+
+    );
+
+    $this->set(array(
+
+      'response'=>$response,
+
+      '_serialize'=>'response'
+
+    ));
+
+    $this->response->withType('application/json');
+
+    $this->response->getBody()->write(json_encode($response));
+
+    return $this->response;
+
+  } 
 
 }

@@ -87,6 +87,8 @@
 
       $routes->resources('Consultations');
 
+      $routes->resources('StudentApplications');
+
 
       //sir raff
 
@@ -115,6 +117,10 @@
       $routes->resources('MedicalCertificates');
 
       $routes->resources('StudentLogs');
+
+      $routes->resources('ApartelleRegistrations');
+
+      $routes->resources('Prospectuses');
 
 
 
@@ -198,6 +204,26 @@
       $routes->resources('AwardeeManagements');
 
       $routes->resources('Completions');
+
+      $routes->resources('Students');
+
+      $routes->resources('Dentals');
+
+      $routes->connect('/reports/faculty_masterlists', ['controller' => 'Reports', 'action' => 'faculty_masterlists']);
+
+      $routes->connect('/reports/enrollment_profiles', ['controller' => 'Reports', 'action' => 'enrollment_profiles']);
+
+      $routes->connect('/reports/enrollment_list', ['controller' => 'Reports', 'action' => 'enrollment_list']);
+
+      $routes->connect('/reports/academic_failures_list', ['controller' => 'Reports', 'action' => 'academic_failures_list']);
+
+      $routes->connect('/reports/student_behavior', ['controller' => 'Reports', 'action' => 'student_behavior']);
+
+      $routes->connect('/reports/list_applicants', ['controller' => 'Reports', 'action' => 'list_applicants']);
+
+      $routes->connect('/reports/list_checkouts', ['controller' => 'Reports', 'action' => 'list_checkouts']);
+
+
 
       // Other routes
       $routes->fallbacks();

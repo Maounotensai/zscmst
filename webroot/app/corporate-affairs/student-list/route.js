@@ -3,12 +3,9 @@ app.config(function($routeProvider) {
   $routeProvider
 
 
-
-
-
   .when('/corporate-affairs/student-list', {
 
-    templateUrl: tmp + 'corporate_affairs__student_list__index',
+    templateUrl: 'angularjs/views/corporate-affairs/student-list/index.ctp',
 
     controller: 'StudentListController',
 
@@ -34,7 +31,7 @@ app.config(function($routeProvider) {
 
   .when('/corporate-affairs/student-list/view/:id', {
 
-    templateUrl: tmp + 'corporate_affairs__student_list__view',
+    templateUrl: 'angularjs/views/corporate-affairs/student-list/view.ctp',
 
     controller: 'StudentListViewController',
 

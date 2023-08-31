@@ -35,6 +35,16 @@ class PrintController extends AppController {
 
     $this->ScholarshipName = TableRegistry::getTableLocator()->get('ScholarshipNames');
 
+    $this->ScholarshipApplication = TableRegistry::getTableLocator()->get('ScholarshipApplications');
+
+    $this->loadModel('Students');
+
+    $this->loadModel('YearLevelTerms');
+
+    $this->loadModel('CollegeProgramCourses');
+
+    $this->loadModel('StudentApplications');
+
 
     //sir leo 
 
@@ -79,6 +89,8 @@ class PrintController extends AppController {
 
     $this->CheckOuts = TableRegistry::getTableLocator()->get('CheckOuts');
 
+    $this->CheckOutSub = TableRegistry::getTableLocator()->get('CheckOutSubs');
+
     $this->CheckIns = TableRegistry::getTableLocator()->get('CheckIns');
 
     $this->IllnessRecommendations = TableRegistry::getTableLocator()->get('IllnessRecommendations');
@@ -95,6 +107,8 @@ class PrintController extends AppController {
      $this->loadModel("NurseProfiles");
 
      $this->loadModel('StudentLogs');
+
+    $this->loadModel('Prospectuses');
 
 
     $this->GoodMorals = TableRegistry::getTableLocator()->get('GoodMorals');
@@ -114,6 +128,9 @@ class PrintController extends AppController {
     $this->MedicalCertificates = TableRegistry::getTableLocator()->get('MedicalCertificates');
 
     $this->ApartelleRegistrations = TableRegistry::getTableLocator()->get('ApartelleRegistrations');
+
+
+    $this->loadModel('Reports');
 
 
     $this->viewBuilder = new ViewBuilder();
@@ -7332,11 +7349,14 @@ class PrintController extends AppController {
     if ($this->request->getQuery('per_student')) {
 
       $per_student = $this->request->getQuery('per_student');
-      
-      $studentId = $this->Session->read('Auth.User.studentId');
 
-      $conditions['studentId'] = "AND CounselingAppointment.student_id = $studentId";
+      $employee_id = $this->Auth->user('studentId');
 
+      if ($employee_id!='') {
+
+        $conditions['studentId'] = "AND CounselingAppointment.student_id = $employee_id";
+
+      }
 
     }
 
@@ -9136,7 +9156,7 @@ class PrintController extends AppController {
 
   }
 
-  public function referral_recommendation(){
+  public function referralRecommendation(){
 
     $conditions = array();
 
@@ -9186,18 +9206,16 @@ class PrintController extends AppController {
 
       $conditions['status'] = "AND ReferralRecommendation.status = $status";
 
-
-      
     }
 
 
     $conditions['studentId'] = '';
 
-    if (isset($this->request->query['per_student'])) {
+    if ($this->request->getQuery('per_student')) {
 
-      $per_student = $this->request->query['per_student'];
+      $per_student = $this->request->getQuery('per_student');
       
-      $employee_id = $this->Session->read('Auth.User.studentId');
+      $employee_id = $this->Auth->user('studentId');
 
       $conditions['studentId'] = "AND ReferralRecommendation.student_id = $employee_id";
 
@@ -9205,7 +9223,7 @@ class PrintController extends AppController {
 
     
 
-    $tmpData = $this->ReferralRecommendation->query($this->ReferralRecommendation->getAllReferralRecommendation($conditions));
+    $tmpData = $this->ReferralRecommendations->getAllReferralRecommendationPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -9249,21 +9267,19 @@ class PrintController extends AppController {
 
       foreach ($tmpData as $key => $data){
 
-        $tmp = $data['ReferralRecommendation'];
-
         $pdf->RowLegalL(array(
 
           $key + 1,
 
-          $data['ReferralRecommendation']['code'],
+          $data['code'],
 
-          $data['ReferralRecommendation']['student_name'] != null ? strtoupper($data['ReferralRecommendation']['student_name']) : strtoupper($data['ReferralRecommendation']['employee_name']),
+          $data['student_name'] != null ? strtoupper($data['student_name']) : strtoupper($data['employee_name']),
 
-          fdate($data['ReferralRecommendation']['date'],'m/d/Y'),
+          fdate($data['date'],'m/d/Y'),
 
-          $data['ReferralRecommendation']['complaints'],  
+          $data['complaints'],  
 
-          $data['ReferralRecommendation']['recommendations'],
+          $data['recommendations'],
 
 
         ));
@@ -9281,32 +9297,40 @@ class PrintController extends AppController {
 
   }
 
- public function referral_recommendation_form($id = null){
+ public function referralRecommendationForm($id = null){
 
-    $office_reference = $this->Global->OfficeReference('Referral Recommendation');
+    // $office_reference = $this->Global->OfficeReference('Referral Recommendation');
+    $data['ReferralRecommendation'] = $this->ReferralRecommendations->find()
 
-    $data = $this->ReferralRecommendation->find('first', array(
+        ->contain([
 
-      'contain' => array(
+            'Students',
 
-        'Student',
+            'NurseProfiles'
 
-        'NurseProfile'
+        ])
 
-      ),
+        ->where([
 
-      'conditions' => array(
+            'ReferralRecommendations.visible' => 1,
 
-        'ReferralRecommendation.visible' => true,
+            'ReferralRecommendations.id' => $id
 
-        'ReferralRecommendation.id' => $id,
+        ])
 
-      )
+        ->first();
 
-    ));
+
+        $data['Student'] = $data['ReferralRecommendation']['student'];
+
+        $data['NurseProfile'] = $data['ReferralRecommendation']['nurse_profile'];
+
+        unset($data['ReferralRecommendation']['student']);
+
+        unset($data['ReferralRecommendation']['nurse_profile']);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
-
+        
     require("wordwrap.php");
     $pdf = new ConductPDF();
     $pdf->SetMargins(5,4,5);
@@ -12218,9 +12242,9 @@ class PrintController extends AppController {
 
       $per_student = $this->request->getQuery('per_student');
 
-      $employee_id = $this->Session->read('Auth.User.studentId');
+      $employee_id = $this->Auth->user('studentId');
 
-      if (!empty($employee_id)) {
+      if ($employee_id!=null) {
 
         $conditions['studentId'] = "AND Consultation.student_id = $employee_id";
 
@@ -13818,16 +13842,26 @@ class PrintController extends AppController {
 
   public function studentClearanceForm($id = null){
     $this->LoadModel('StudentClearances');
+
     $data = $this->StudentClearances->find()
+
       ->contain([
+
           'Students'=> [
+
               'conditions' => ['Students.visible' => 1],
+
             ],
 
+
           'CollegePrograms'=> [
+
               'conditions' => ['CollegePrograms.visible' => 1],
+
             ]
+
         ])
+
 
       ->where([
 
@@ -16795,7 +16829,7 @@ class PrintController extends AppController {
   
   }
 
-  public function student_applications(){
+  public function studentApplications(){
 
     $conditions = array();
 
@@ -16803,9 +16837,11 @@ class PrintController extends AppController {
 
     // search conditions
 
-    if(isset($this->request->query['search'])){
+    $conditions['search'] = '';
 
-      $search = $this->request->query['search'];
+    if ($this->request->getQuery('search')) {
+
+      $search = $this->request->getQuery('search');
 
       $search = strtolower($search);
 
@@ -16813,11 +16849,12 @@ class PrintController extends AppController {
 
     }
 
-    $conditions['date'] = ''; 
 
-    if (isset($this->request->query['date'])) {
+    $conditions['date'] = '';
 
-      $search_date = $this->request->query['date'];
+    if ($this->request->getQuery('date')) {
+
+      $search_date = $this->request->getQuery('date');
 
       $conditions['date'] = " AND DATE(ScholarshipApplication.date) = '$search_date'"; 
 
@@ -16827,11 +16864,11 @@ class PrintController extends AppController {
 
     //advance search
 
-    if (isset($this->request->query['startDate'])) {
+    if ($this->request->getQuery('startdate')) {
 
-      $start = $this->request->query['startDate']; 
+      $start = $this->request->getQuery('startdate'); 
 
-      $end = $this->request->query['endDate'];
+      $end = $this->request->getQuery('endDate');
 
       $conditions['date'] = " AND DATE(ScholarshipApplication.date) >= '$start' AND DATE(ScholarshipApplication.date) <= '$end'";
 
@@ -16843,27 +16880,33 @@ class PrintController extends AppController {
 
     $conditions['status'] = '';
 
-    if (isset($this->request->query['status'])) {
+    if ($this->request->getQuery('status')!=null) {
 
-      $status = $this->request->query['status'];
+      $status = $this->request->getQuery('status');
 
-      $conditions['status'] = "AND ScholarshipApplication.approve = $status";
-
-    }
-
-    $conditions['studentId'] = '';
-
-    if (isset($this->request->query['per_student'])) {
-
-      $per_student = $this->request->query['per_student'];
-      
-      $employee_id = $this->Session->read('Auth.User.studentId');
-
-      $conditions['studentId'] = "AND ScholarshipApplication.student_id = $employee_id";
+      $conditions['status'] = " AND ScholarshipApplication.approve = $status";
 
     }
 
-    $tmpData = $this->ScholarshipApplication->query($this->ScholarshipApplication->getAllScholarshipApplication($conditions));
+    $conditions['rate'] = '';
+
+    if ($this->request->getQuery('rate')) {
+
+      $rate = $this->request->getQuery('rate');
+
+      if($rate == 0){
+
+        $conditions['rate'] = "AND StudentApplication.rate_by_id IS NULL";
+
+      }else{
+
+        $conditions['rate'] = "AND StudentApplication.rate_by_id IS NOT NULL";
+
+      }
+
+    }
+    
+    $tmpData = $this->ScholarshipApplication->getAllScholarshipApplicationPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -16911,19 +16954,19 @@ class PrintController extends AppController {
 
         $status = '';
 
-        if($data['ScholarshipApplication']['approve'] == 0){
+        if($data['approve'] == 0){
 
           $status = 'PENDING';
 
-        }elseif($data['ScholarshipApplication']['approve'] == 1){
+        }elseif($data['approve'] == 1){
 
           $status = 'FOR PROCESSING';
 
-        }elseif($data['ScholarshipApplication']['approve'] == 2){
+        }elseif($data['approve'] == 2){
 
           $status = 'DISAPPROVED';
 
-        }elseif($data['ScholarshipApplication']['approve'] == 4){
+        }elseif($data['approve'] == 4){
 
           $status = 'CONFIRMED';
 
@@ -16933,17 +16976,17 @@ class PrintController extends AppController {
 
           $key + 1,
 
-          $data['ScholarshipApplication']['code'],
+          $data['code'],
 
-          $data['ScholarshipApplication']['student_name'],
+          $data['student_name'],
 
-          fdate($data['ScholarshipApplication']['date'],'m/d/Y'),
+          fdate($data['date'],'m/d/Y'),
 
-          $data['CollegeProgram']['name'],
+          $data['name'],
 
-          $data['ScholarshipApplication']['age'],
+          $data['age'],
 
-          $data['ScholarshipApplication']['sex'],
+          $data['sex'],
 
           $status
 
@@ -16962,30 +17005,39 @@ class PrintController extends AppController {
   
   }
 
-  public function scholarship_application_form($id = null){
+  public function scholarshipApplicationForm($id = null){
 
-    $office_reference = $this->Global->OfficeReference('Scholarship Application');
+    // $office_reference = $this->Global->OfficeReference('Scholarship Application');
 
-    $data = $this->ScholarshipApplication->find('first', array(
+    $data['ScholarshipApplication'] = $this->ScholarshipApplication->find()
 
-      'contain' => array(
+    ->contain([
 
-        'Student',
+        'Students',
 
-        'CollegeProgram',
-        'YearLevelTerm'
+        'CollegePrograms',
 
-      ),
+        'YearLevelTerms'
 
-      'conditions' => array(
+    ])
 
-        'ScholarshipApplication.visible' => true,
+    ->where([
 
-        'ScholarshipApplication.id' => $id,
+        'ScholarshipApplications.visible' => 1,
 
-      )
+        'ScholarshipApplications.id' => $id
 
-    ));
+    ])
+
+    ->first();
+
+    $data['CollegeProgram'] = $data['ScholarshipApplication']['college_program'];
+
+    $data['YearLevelTerm'] = $data['ScholarshipApplication']['year_level_term'];
+
+    unset($data['ScholarshipApplication']['college_program']);
+
+    unset($data['ScholarshipApplication']['year_level_term']);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -17086,7 +17138,7 @@ class PrintController extends AppController {
     $pdf->SetFont("calibri", '', 11);
     $pdf->Cell(7);
     $pdf->Cell(30,5,'Date Applied:',0,0,'L');
-    $pdf->Cell(30,5,fdate($data['ScholarshipApplication']['date'],'m/d/Y'),0,0,'L');
+    $pdf->Cell(30,5,$data['ScholarshipApplication']['date']->format('m/d/Y'),0,0,'L');
     $pdf->Line(40,$pdf->getY()+4,70,$pdf->getY()+4);
 
     $pdf->Ln(12);
@@ -17140,7 +17192,7 @@ class PrintController extends AppController {
     $pdf->Ln(8);
     $pdf->Cell(7);
     $pdf->Cell(20,5,'Birthdate:',0,0,'L');
-    $pdf->Cell(30,5,fdate($data['ScholarshipApplication']['birthdate'],'m/d/Y'),0,0,'L');
+    $pdf->Cell(30,5,$data['ScholarshipApplication']['birthdate']->format('m/d/Y'),0,0,'L');
     $pdf->Line(31,$pdf->getY()+4,60,$pdf->getY()+4);
     $pdf->Cell(30,5,'Place of Birth:',0,0,'L');
     $pdf->Cell(70,5,$data['ScholarshipApplication']['place_of_birth'],0,0,'L');
@@ -17860,9 +17912,9 @@ class PrintController extends AppController {
 
     // search conditions
 
-    if(isset($this->request->query['search'])){
+    if($this->request->getQuery('search')){
 
-      $search = $this->request->query['search'];
+      $search = $this->request->getQuery('search');
 
       $search = strtolower($search);
 
@@ -17872,9 +17924,9 @@ class PrintController extends AppController {
 
     $conditions['date'] = '';
 
-    if (isset($this->request->query['date'])) {
+    if ($this->request->getQuery('date')) {
 
-      $search_date = $this->request->query['date'];
+      $search_date = $this->request->getQuery('date');
 
       $conditions['date'] = " AND DATE(StudentEnrollment.date) = '$search_date'"; 
 
@@ -17882,11 +17934,11 @@ class PrintController extends AppController {
 
     //advance search
 
-    if (isset($this->request->query['startDate'])) {
+    if ($this->request->getQuery('startDate')) {
 
-      $start = $this->request->query['startDate']; 
+      $start = $this->request->getQuery('startDate'); 
 
-      $end = $this->request->query['endDate'];
+      $end = $this->request->getQuery('endDate');
 
       $conditions['date'] = " AND DATE(StudentEnrollment.date) >= '$start' AND DATE(StudentEnrollment.date) <= '$end'";
 
@@ -17894,9 +17946,9 @@ class PrintController extends AppController {
 
     $conditions['college_id'] = " AND Student.college_id = null";
 
-    if (isset($this->request->query['college_id'])) {
+    if ($this->request->getQuery('college_id')) {
 
-      $college_id = $this->request->query['college_id']; 
+      $college_id = $this->request->getQuery('college_id'); 
 
       $conditions['college_id'] = " AND Student.college_id = $college_id";
 
@@ -17904,9 +17956,9 @@ class PrintController extends AppController {
 
     $conditions['program_id'] = " AND Student.program_id = null";
 
-    if (isset($this->request->query['program_id'])) {
+    if ($this->request->getQuery('program_id')) {
 
-      $program_id = $this->request->query['program_id']; 
+      $program_id = $this->request->getQuery('program_id'); 
 
       $conditions['program_id'] = " AND Student.program_id = $program_id";
 
@@ -17914,15 +17966,15 @@ class PrintController extends AppController {
 
     $conditions['year_term_id'] = " AND StudentEnrollment.year_term_id = null";
 
-    if (isset($this->request->query['year_term_id'])) {
+    if ($this->request->getQuery('year_term_id')) {
 
-      $year_term_id = $this->request->query['year_term_id']; 
+      $year_term_id = $this->request->getQuery('year_term_id'); 
 
       $conditions['year_term_id'] = " AND StudentEnrollment.year_term_id = $year_term_id";
 
     }
 
-    $tmpData = $this->Prospectus->query($this->Prospectus->getAllProspectus($conditions));
+    $tmpData = $this->Prospectuses->getAllProspectusPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -17961,7 +18013,7 @@ class PrintController extends AppController {
     $pdf->SetWidths(array(8,27,50,60,60));
     $pdf->SetAligns(array('C','C','L','C','C'));
 
-    if(!empty($tmpData)){
+    if(count($tmpData)>0){
 
       foreach ($tmpData as $key => $data){
 
@@ -17969,13 +18021,13 @@ class PrintController extends AppController {
 
           $key + 1,
 
-          $data['StudentEnrollment']['student_no'],
+          $data['student_no'],
 
-          $data[0]['full_name'],
+          $data['full_name'],
 
-          $data['College']['college'],
+          $data['college'],
 
-          $data['CollegeProgram']['program'],
+          $data['program'],
 
         ));
 
@@ -18132,7 +18184,7 @@ class PrintController extends AppController {
   
   }
 
-  public function list_checkouts(){
+  public function listCheckouts(){
 
     $conditions = array();
 
@@ -18140,9 +18192,9 @@ class PrintController extends AppController {
 
     // search conditions
 
-    if(isset($this->request->query['search'])){
+   if($this->request->getQuery('search')){
 
-      $search = $this->request->query['search'];
+      $search = $this->request->getQuery('search');
 
       $search = strtolower($search);
 
@@ -18150,9 +18202,27 @@ class PrintController extends AppController {
 
     }
 
-    $this->loadModel('Report');
+    $conditions['date'] = '';
 
-    $tmpData = $this->Report->query($this->Report->getAllListCheckOuts($conditions));
+    if ($this->request->getQuery('date')) {
+
+      $search_date = $this->request->getQuery('date');
+
+      $conditions['date'] = " AND DATE(CheckOut.date_borrowed) = '$search_date'"; 
+
+    }
+
+    if ($this->request->getQuery('startDate')) {
+
+      $start = $this->request->getQuery('startDate'); 
+
+      $end = $this->request->getQuery('endDate');
+
+      $conditions['date'] = " AND DATE(CheckOut.date_borrowed) >= '$start' AND DATE(CheckOut.date_borrowed) <= '$end'";
+
+    }
+
+    $tmpData =$this->Reports->getAllCheckOutPrint($conditions);
 
     require("wordwrap.php");
     $pdf = new ConductPDF();
@@ -18185,36 +18255,80 @@ class PrintController extends AppController {
     $pdf->Cell(65,5,'TITLE',1,0,'C',1);
     $pdf->Cell(35,5,'AUTHOR',1,0,'C',1);
     $pdf->Cell(30,5,'BARCODE NO.',1,0,'C',1);
-    $pdf->Cell(35,5,'DATE BORROWED',1,0,'C',1);
+    $pdf->Cell(35,5,'DATE/nBORROWED',1,0,'C',1);
     $pdf->Cell(35,5,'DATE DUE',1,0,'C',1);
     $pdf->Ln();
     $pdf->SetFont("Arial", '', 8);
     $pdf->SetWidths(array(10,70,65,65,35,30,35,35));
     $pdf->SetAligns(array('C','L','L','L','C','C','C','C'));
 
-    if(!empty($tmpData)){
+    if(count($tmpData) > 0){
 
       foreach ($tmpData as $key => $data){
 
-        $tmp = $data['Report'];
+        $sub = $this->CheckOutSub->find()
+
+          ->where([
+
+            'visible' => 1,
+
+            'check_out_id' => $data['id'],
+
+          ])
+
+        ->all();
+
+        $title = '';
+
+        $author = '';
+
+        $barcode = '';
+
+        $dateDue = '';
+
+        foreach ($sub as $k => $value) {
+            
+          if($k == 0){
+
+            $title .= $value['title'];
+
+            $author .= $value['author'];
+
+            $barcode .= $value['barcode_no'];
+
+            $dateDue .= $value['dueback']->format('m/d/Y');
+
+          }else{
+
+            $title .= "\n".$value['title'];
+
+            $author .= "\n".$value['author'];
+
+            $barcode .= "\n".$value['barcode_no'];
+
+            $dateDue .= "\n".$value['dueback']->format('m/d/Y');
+
+          }
+
+        }
 
         $pdf->RowLegalL(array(
 
           $key + 1,
 
-          $data['Report']['code'],  
+          $data['code'],  
 
-          $data['Report']['student_name'],
+          $data['member_name'],
 
-          $data['Report']['title'],
+          $title,
 
-          $data['Report']['author'],
+          $author,
 
-          $data['Report']['barcode_no'],
+          $barcode,
 
-          fdate($data['Report']['status_dt'], 'm/d/Y'),
+          fdate($data['date_borrowed'],'m/d/Y'),
 
-          fdate($data['Report']['dueback'],'m/d/Y'),
+          $dateDue,
 
           
         ));
@@ -18596,111 +18710,89 @@ class PrintController extends AppController {
   }
 
 
-  public function prospectus_form($id = null){
+  public function prospectusForm($id = null){
 
-    $office_reference = $this->Global->OfficeReference('Prospectus');
+    // $office_reference = $this->Global->OfficeReference('Prospectus');
 
-    $data = $this->Student->find('first', array(
+    $data['Student'] = $this->Students->find()
+    ->contain([
+        'Colleges' => [
+            'conditions' => [
+                'Colleges.visible' => 1
+            ]
+        ],
+        'CollegePrograms' => [
+            'conditions' => [
+                'CollegePrograms.visible' => 1
+            ]
+        ],
+        'StudentEnrolledCourses' => [
+            'conditions' => [
+                'StudentEnrolledCourses.visible' => 1
+            ]
+        ],
+        'StudentEnrolledUnits' => [
+            'conditions' => [
+                'StudentEnrolledUnits.visible' => 1
+            ]
+        ],
+        'StudentEnrollments' => [
+            'conditions' => [
+                'StudentEnrollments.visible' => 1
+            ]
+        ]
+    ])
+    ->where([
+        'Students.visible' => 1,
+        'Students.id' => $id
+    ])
+    ->first();
 
-      'contain' => array(
-        
-        'College' => array(
-        
-          'Campus' => array(
+      $data['Student']['proper_name'] = $data['Student']['last_name'].', '.$data['Student']['first_name'].' '.$data['Student']['middle_name'];
 
-            'conditions' => array(
+      $data['College'] = $data['Student']['college'];
 
-              'Campus.visible' => true
+      $data['CollegeProgram'] = $data['Student']['college_program'];
 
-            ),
+      $data['StudentEnrolledCourse'] = $data['Student']['student_enrolled_courses'];
 
-          ),
+      $data['StudentEnrolledUnit'] = $data['Student']['student_enrolled_units'];
 
-          'conditions' => array(
+      $data['StudentEnrollment'] = $data['Student']['student_enrollments'];
 
-            'College.visible' => true
+      
+      unset($data['Student']['college']);
 
-          ),
+      unset($data['Student']['college_program']);
+      
+      unset($data['Student']['student_enrolled_courses']);
 
-        ),
-        
-        'CollegeProgram' => array(
+      unset($data['Student']['student_enrolled_units']);
 
-          'conditions' => array(
+      unset($data['Student']['student_enrollments']);
 
-            'CollegeProgram.visible' => true
-
-          ),
-
-        ),
-        
-        'StudentEnrolledCourse' => array(
-
-          'conditions' => array(
-
-            'StudentEnrolledCourse.visible' => true
-
-          )
-
-        ),
-
-        'StudentEnrolledUnit' => array(
-
-          'conditions' => array(
-
-            'StudentEnrolledUnit.visible' => true
-
-          )
-
-        ),
-
-        'StudentEnrollment' => array(
-
-          'conditions' => array(
-
-            'StudentEnrollment.visible' => true
-
-          )
-
-        )
-
-      ),
-
-      'conditions' => array(
-
-        'Student.visible' => true,
-
-        'Student.id'      => $id,
-
-      )
-
-    ));
 
     $prospectus = array();
 
-    $year_term = $this->YearLevelTerm->find('all', array(
+    $year_term = $this->YearLevelTerms->find()
+    ->where([
+        'YearLevelTerms.visible' => 1,
+        'YearLevelTerms.active_prospectus' => 1
+    ])
+    ->all();
 
-      'conditions' => array(
 
-        'YearLevelTerm.visible' => true,
-
-        'YearLevelTerm.active_prospectus' => true
-
-      )
-
-    ));
-
-    if(!empty($year_term)){
+     if($year_term!=null){
 
       foreach ($year_term as $keys => $values) {
 
         $subs = array();
         
-        if(!empty($data['StudentEnrolledCourse'])){
+        if($data['StudentEnrolledCourse']!=null){
 
           foreach ($data['StudentEnrolledCourse'] as $key => $value) {
             
-            if($values['YearLevelTerm']['id'] == $value['year_term_id']){
+            if($values['id'] == $value['year_term_id']){
 
               $program_id = $data['Student']['program_id'];
 
@@ -18708,7 +18800,7 @@ class PrintController extends AppController {
 
               $year_term_id = $value['year_term_id'];              
 
-              $prerequisites = $this->CollegeProgramCourse->query("
+              $result = "
 
                 SELECT 
 
@@ -18732,15 +18824,20 @@ class PrintController extends AppController {
 
                   CollegeProgramPrerequisite.visible = true
 
-              ");
+              ";
 
               $course_prerequisites = array();
 
-              if(!empty($prerequisites)){
+              $connection = $this->CollegeProgramCourses->getConnection();
+
+              $prerequisites = $connection->execute($result)->fetchAll('assoc');
+
+
+              if($prerequisites!=null){
 
                 foreach ($prerequisites as $index => $datas) {
 
-                  $courses = $this->Course->findById($datas['CollegeProgramPrerequisite']['course_id']);
+                  $courses = $this->Courses->get($datas['CollegeProgramPrerequisite']['course_id']);
                   
                   $course_prerequisites[] = array(
 
@@ -18778,9 +18875,9 @@ class PrintController extends AppController {
 
         $prospectus[] = array(
 
-          'semester' => $values['YearLevelTerm']['semester'],
+          'semester' => $values['semester'],
 
-          'year'     => $values['YearLevelTerm']['year'],
+          'year'     => $values['year'],
 
           'subs'     => $subs,
 
@@ -18789,6 +18886,7 @@ class PrintController extends AppController {
       }
 
     }
+
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -19757,9 +19855,9 @@ class PrintController extends AppController {
 
     // search conditions
 
-    if(isset($this->request->query['search'])){
+    if($this->request->getQuery('search')){
 
-      $search = $this->request->query['search'];
+      $search = $this->request->getQuery('search');
 
       $search = strtolower($search);
 
@@ -19769,9 +19867,9 @@ class PrintController extends AppController {
 
     $conditions['date'] = '';
 
-    if (isset($this->request->query['date'])) {
+    if ($this->request->getQuery('date')) {
 
-      $search_date = $this->request->query['date'];
+      $search_date = $this->request->getQuery('date');
 
       $conditions['date'] = " AND DATE(StudentApplication.application_date) = '$search_date'"; 
 
@@ -19781,11 +19879,11 @@ class PrintController extends AppController {
 
     //advance search
 
-    if (isset($this->request->query['startDate'])) {
+    if ($this->request->getQuery('startDate')) {
 
-      $start = $this->request->query['startDate']; 
+      $start = $this->request->getQuery('startDate'); 
 
-      $end = $this->request->query['endDate'];
+      $end = $this->request->getQuery('endDate');
 
       $conditions['date'] = " AND DATE(StudentApplication.application_date) >= '$start' AND DATE(StudentApplication.application_date) <= '$end'";
 
@@ -19797,9 +19895,9 @@ class PrintController extends AppController {
 
     $conditions['rate'] = '';
 
-    if (isset($this->request->query['rate'])) {
+    if ($this->request->getQuery('rate')) {
 
-      $rate = $this->request->query['rate'];
+      $rate = $this->request->getQuery('rate');
 
       if($rate == 0){
 
@@ -19813,7 +19911,7 @@ class PrintController extends AppController {
 
     }
 
-    $tmpData = $this->StudentApplication->query($this->StudentApplication->getAllStudentApplication($conditions));
+    $tmpData = $this->StudentApplications->getAllStudentApplicationPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -19854,7 +19952,7 @@ class PrintController extends AppController {
     $pdf->SetWidths(array(15,90,55,70,35,30,35));
     $pdf->SetAligns(array('C','L','C','L','C','C','C'));
 
-    if(!empty($tmpData)){
+    if(count($tmpData)>0){
 
       foreach ($tmpData as $key => $data){
 
@@ -19862,17 +19960,17 @@ class PrintController extends AppController {
 
           $key + 1,
 
-          strtoupper($data[0]['full_name']),
+          strtoupper($data['full_name']),
 
-          $data['StudentApplication']['email'],
+          $data['email'],
 
-          $data['StudentApplication']['address'],
+          $data['address'],
 
-          $data['StudentApplication']['contact_no'],
+          $data['contact_no'],
 
-          $data['StudentApplication']['gender'],
+          $data['gender'],
 
-          fdate($data['StudentApplication']['application_date'],'m/d/Y'),
+          fdate($data['application_date'],'m/d/Y'),
 
         ));
 
@@ -22354,73 +22452,64 @@ EQUIVALENT',1,'C',0);
 
   }
 
-  public function cat_application_form($id = null){
+  public function catApplicationForm($id = null){
 
-    $office_reference = $this->Global->OfficeReference('Cat');
+    // $office_reference = $this->Global->OfficeReference('Cat');
 
-    $data = $this->StudentApplication->find('first', array(
+    $data['StudentApplication'] = $this->StudentApplications->find()
+    ->contain([
+        'YearLevelTerms',
+        'Colleges',
+        'CollegePrograms',
+        'SecondaryPrograms',
+        'StudentApplicationImages' => [
+            'conditions' => [
+                'StudentApplicationImages.visible' => 1
+            ]
+        ],
+        'StudentEnrolledCourses' => [
+            'conditions' => [
+                'StudentEnrolledCourses.visible' => 1
+            ]
+        ],
+        'StudentEnrolledUnits' => [
+            'conditions' => [
+                'StudentEnrolledUnits.visible' => 1
+            ]
+        ],
+        'StudentEnrollments' => [
+            'conditions' => [
+                'StudentEnrollments.visible' => 1
+            ]
+        ]
+    ])
+    ->where([
+        'StudentApplications.visible' => 1,
+        'StudentApplications.id' => $id
+    ])
+    ->first();
 
-      'contain' => array(
+    $data['StudentApplicationImage'] = $data['StudentApplication']['student_application_images'];
 
-        'YearLevelTerm',
+    $data['College'] = $data['StudentApplication']['college'];
 
-        'College',
+    $data['CollegeProgram'] = $data['StudentApplication']['college_program'];
 
-        'CollegeProgram',
+    $data['CollegeProgramSecondary'] = $data['StudentApplication']['secondary_program'];
 
-        'CollegeProgramSecondary',
+    $data['YearLevelTerm'] = $data['StudentApplication']['year_level_term'];
 
-        'StudentApplicationImage' => array(
+    unset($data['StudentApplication']['student_application_image']);
 
-          'conditions' => array(
+    unset($data['StudentApplication']['college']);
 
-            'StudentApplicationImage.visible' => true
+    unset($data['StudentApplication']['preferred_program']);
 
-          ),
+    unset($data['StudentApplication']['year_level_term']);
 
-        ),
+    unset($data['StudentApplication']['secondary_program']);
 
-        'StudentEnrolledCourse' => array(
-
-          'conditions' => array(
-
-            'StudentEnrolledCourse.visible' => true
-
-          )
-
-        ),
-
-        'StudentEnrolledUnit' => array(
-
-          'conditions' => array(
-
-            'StudentEnrolledUnit.visible' => true
-
-          )
-
-        ),
-
-        'StudentEnrollment' => array(
-
-          'conditions' => array(
-
-            'StudentEnrollment.visible' => true
-
-          )
-
-        )
-
-      ),
-
-      'conditions' => array(
-
-        'StudentApplication.visible' => true,
-
-        'StudentApplication.id' => $id,
-
-      )
-
-    ));
+    unset($data['StudentApplication']['college_program']);
 
 
     
@@ -22565,7 +22654,7 @@ EQUIVALENT',1,'C',0);
     $pdf->Ln(5.4);
     $pdf->Cell(9);
     $pdf->SetFont("Arial", '', 8);
-    $pdf->Cell(53,5,fdate($data['StudentApplication']['birth_date']),0,0,'L');
+    $pdf->Cell(53,5,$data['StudentApplication']['birth_date']->format('m/d/Y'),0,0,'L');
     $pdf->Cell(54,5,$data['StudentApplication']['birth_place'],0,0,'L');
     $pdf->Cell(45,5,$data['StudentApplication']['nationality'],0,0,'L');
 
@@ -22800,7 +22889,7 @@ EQUIVALENT',1,'C',0);
     $pdf->Cell(9);
     $pdf->Cell(161,4,'I here by certify that information indicated herein is true and correct. I am fully aware',0,0,'L');
     $pdf->SetFont("Arial", '', 8);
-    $pdf->Cell(40.3,5,fdate($data['StudentApplication']['application_date']),0,0,'L');
+    $pdf->Cell(40.3,5,$data['StudentApplication']['application_date']->format('m/d/Y'),0,0,'L');
     $pdf->SetFont("Arial", '', 7);
     $pdf->Ln(4);
     $pdf->Cell(9);
@@ -23696,7 +23785,7 @@ EQUIVALENT',1,'C',0);
 
   }
 
-  public function enrollment_list(){
+  public function enrollmentList(){
 
     $conditions = array();
 
@@ -23704,9 +23793,9 @@ EQUIVALENT',1,'C',0);
 
     // search conditions
 
-    if(isset($this->request->query['search'])){
+    if($this->request->getQuery('search')){
 
-      $search = $this->request->query['search'];
+      $search = $this->request->getQuery('search');
 
       $search = strtolower($search);
 
@@ -23716,9 +23805,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['date'] = '';
 
-    if (isset($this->request->query['date'])) {
+    if ($this->request->getQuery('date')) {
 
-      $search_date = $this->request->query['date'];
+      $search_date = $this->request->getQuery('date');
 
       $conditions['date'] = " AND DATE(StudentEnrollment.date) = '$search_date'"; 
 
@@ -23726,11 +23815,11 @@ EQUIVALENT',1,'C',0);
 
     //advance search
 
-    if (isset($this->request->query['startDate'])) {
+    if ($this->request->getQuery('startDate')) {
 
-      $start = $this->request->query['startDate']; 
+      $start = $this->request->getQuery('startDate'); 
 
-      $end = $this->request->query['endDate'];
+      $end = $this->request->getQuery('endDate');
 
       $conditions['date'] = " AND DATE(StudentEnrollment.date) >= '$start' AND DATE(StudentEnrollment.date) <= '$end'";
 
@@ -23740,9 +23829,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['year_term_id_enrollment'] = '';
 
-    if (isset($this->request->query['year_term_id'])) {
+    if ($this->request->getQuery('year_term_id')) {
 
-      $year_term_id = $this->request->query['year_term_id']; 
+      $year_term_id = $this->request->getQuery('year_term_id'); 
 
       $conditions['year_term_id'] = " AND Student.year_term_id = $year_term_id";
 
@@ -23750,9 +23839,9 @@ EQUIVALENT',1,'C',0);
 
     }
 
-    $this->loadModel('Report');
+    $this->loadModel('Reports');
 
-    $tmpData = $this->Report->query($this->Report->getAllEnrollmentList($conditions));
+    $tmpData =$this->Reports->getAllEnrollmentListPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -23796,7 +23885,7 @@ EQUIVALENT',1,'C',0);
     $pdf->SetWidths(array(8,22,45,58,50,22));
     $pdf->SetAligns(array('C','C','L','C','C','C'));
 
-    if(!empty($tmpData)){
+    if(count($tmpData)>0){
 
       foreach ($tmpData as $key => $data){
 
@@ -23804,15 +23893,15 @@ EQUIVALENT',1,'C',0);
 
           $key + 1,
 
-          $data['Report']['student_no'],
+          $data['student_no'],
 
-          $data['Report']['full_name'],
+          $data['full_name'],
 
-          $data['Report']['college'],
+          $data['college'],
 
-          $data['Report']['program'],
+          $data['program'],
 
-          fdate($data['Report']['date'],'m/d/Y'),
+          fdate($data['date'],'m/d/Y'),
 
         ));
 
@@ -27187,7 +27276,7 @@ EQUIVALENT',1,'C',0);
   
   }
 
-  public function report_student_behavior(){
+  public function reportStudentBehavior(){
 
     $conditions = array();
 
@@ -27195,9 +27284,9 @@ EQUIVALENT',1,'C',0);
 
     // search conditions
 
-    if(isset($this->request->query['search'])){
+    if($this->request->getQuery('search')){
 
-      $search = $this->request->query['search'];
+      $search = $this->request->getQuery('search');
 
       $search = strtolower($search);
 
@@ -27207,9 +27296,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['date'] = '';
 
-    if (isset($this->request->query['date'])) {
+    if ($this->request->getQuery('date')) {
 
-      $search_date = $this->request->query['date'];
+      $search_date = $this->request->getQuery('date');
 
       $conditions['date'] = " AND DATE(StudentBehavior.date) = '$search_date'"; 
 
@@ -27219,11 +27308,11 @@ EQUIVALENT',1,'C',0);
 
     //advance search
 
-    if (isset($this->request->query['startDate'])) {
+    if ($this->request->getQuery('startDate')) {
 
-      $start = $this->request->query['startDate']; 
+      $start = $this->request->getQuery('startDate'); 
 
-      $end = $this->request->query['endDate'];
+      $end = $this->request->getQuery('endDate');
 
       $conditions['date'] = " AND DATE(StudentBehavior.date) >= '$start' AND DATE(StudentBehavior.date) <= '$end'";
 
@@ -27232,13 +27321,11 @@ EQUIVALENT',1,'C',0);
       $dates['endDate']   = $end;
 
     }
-
-
     $conditions['program_id'] = '';
 
-    if (isset($this->request->query['program_id'])) {
+    if ($this->request->getQuery('program_id')) {
 
-      $program_id = $this->request->query['program_id']; 
+      $program_id = $this->request->getQuery('program_id'); 
 
       $conditions['program_id'] = " AND StudentBehavior.course_id = $program_id";
 
@@ -27246,17 +27333,18 @@ EQUIVALENT',1,'C',0);
 
     $conditions['year'] = "";
 
-    if (isset($this->request->query['year'])) {
 
-      $year = $this->request->query['year']; 
+    if ($this->request->getQuery('year_term_id')) {
 
-      $conditions['year'] = " AND StudentBehavior.year = $year ";
+      $year = $this->request->getQuery('year_term_id'); 
+
+      $conditions['year'] = " AND StudentBehavior.year_term_id = '$year' ";
 
     }
 
-    $this->loadModel('Report');
+    $this->loadModel('Reports');
 
-    $tmpData = $this->Report->query($this->Report->getAllStudentBehavior($conditions));
+    $tmpData = $this->Reports->getAllStudentBehaviorPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -27302,13 +27390,13 @@ EQUIVALENT',1,'C',0);
 
           $key + 1,
 
-          $data['Report']['student_no'],
+          $data['student_no'],
 
-          $data['Report']['student_name'],
+          $data['student_name'],
 
-          $data['Report']['program'],
+          $data['program'],
 
-          $data['Report']['behavior'],
+          $data['behavior'],
 
 
         ));
@@ -28446,7 +28534,7 @@ EQUIVALENT',1,'C',0);
 
   }
 
-  public function academic_failures_list(){
+  public function academicFailuresList(){
 
     $conditions = array();
 
@@ -28464,9 +28552,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['college_id'] = '';
 
-    if (isset($this->request->query['college_id'])) {
+    if ($this->request->getQuery('college_id')) {
 
-      $college_id = $this->request->query['college_id']; 
+      $college_id = $this->request->getQuery('college_id'); 
 
       $conditions['college_id'] = " AND Student.college_id = $college_id";
 
@@ -28474,9 +28562,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['college_program_id'] = "AND Student.program_id IS NULL";
 
-    if (isset($this->request->query['college_program_id'])) {
+    if ($this->request->getQuery('college_program_id')) {
 
-      $college_program_id = $this->request->query['college_program_id']; 
+      $college_program_id = $this->request->getQuery('college_program_id'); 
 
       $conditions['college_program_id'] = " AND Student.program_id = $college_program_id";
 
@@ -28485,25 +28573,19 @@ EQUIVALENT',1,'C',0);
 
     $conditions['program_course_id'] = '';
 
-    if (isset($this->request->query['program_course_id'])) {
+    if ($this->request->getQuery('program_course_id')) {
 
-      $program_course_id = $this->request->query['program_course_id']; 
+      $program_course_id = $this->request->getQuery('program_course_id'); 
 
       $conditions['program_course_id'] = " AND StudentEnrolledCourse.course_id = $program_course_id";
 
 
-      $adata = $this->Course->find('first', array(
-
-
-      'conditions' => array(
-
-        'Course.visible' => true,
-
-        'Course.id' => $program_course_id,
-
-      )
-
-    ));
+      $adata = $this->Course->find()
+        ->where([
+            'Course.visible' => true,
+            'Course.id' => $program_course_id
+        ])
+        ->first();
 
 
     }
@@ -28512,9 +28594,9 @@ EQUIVALENT',1,'C',0);
 
     $term = '';
 
-    if (isset($this->request->query['term'])) {
+    if ($this->request->getQuery('term')) {
 
-      $term = $this->request->query['term']; 
+      $term = $this->request->getQuery('term'); 
 
       if($term === 'midterm'){
         $conditions['term'] = " AND StudentEnrolledCourse.midterm_submitted = 1 AND StudentEnrolledCourse.midterm_grade > 3 ";
@@ -28528,9 +28610,9 @@ EQUIVALENT',1,'C',0);
 
     }
 
-    $this->loadModel('Report');
+    $this->loadModel('Reports');
 
-    $tmpData = $this->Report->query($this->Report->getAllFailedStudent($conditions));
+    $tmpData = $this->Reports->getAllFailedStudentPrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -28576,7 +28658,7 @@ EQUIVALENT',1,'C',0);
     $pdf->SetWidths(array(15,70,120,70,65));
     $pdf->SetAligns(array('C','C','C','C','C'));
       
-     if(!empty($tmpData)){
+     if(count($tmpData)>0){
 
       foreach ($tmpData as $key => $data){
 
@@ -28584,11 +28666,11 @@ EQUIVALENT',1,'C',0);
 
           $key + 1,
 
-          $data['Report']['student_no'],
+          $data['student_no'],
 
-          $data['Report']['full_name'],
+          $data['full_name'],
 
-          $data['Report']['year'].'-'.$data['Report']['semester'],
+          $data['year'].'-'.$data['semester'],
 
           "FAILED",
 
@@ -28938,7 +29020,7 @@ EQUIVALENT',1,'C',0);
   
   }
 
-  public function enrollment_profile(){
+  public function enrollmentProfile(){
 
     $conditions = array();
 
@@ -28956,9 +29038,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['year_term_id'] = "AND Student.year_term_id IS NULL";
 
-    if (isset($this->request->query['year_term_id'])) {
+    if ($this->request->getQuery('year_term_id')) {
 
-      $year_term_id = $this->request->query['year_term_id']; 
+      $year_term_id = $this->request->getQuery('year_term_id'); 
 
       $conditions['year_term_id'] = " AND Student.year_term_id = $year_term_id";
 
@@ -28967,9 +29049,9 @@ EQUIVALENT',1,'C',0);
 
     $conditions['college_id'] = " ";
 
-    if (isset($this->request->query['college_id'])) {
+    if ($this->request->getQuery('college_id')) {
 
-      $college_id = $this->request->query['college_id']; 
+      $college_id = $this->request->getQuery('college_id'); 
 
       $conditions['college_id'] = " AND Student.college_id = $college_id";
 
@@ -28977,18 +29059,18 @@ EQUIVALENT',1,'C',0);
     }
     $conditions['section_id'] = " ";
 
-    if (isset($this->request->query['section_id'])) {
+    if ($this->request->getQuery('section_id')) {
 
-      $section_id = $this->request->query['section_id']; 
+      $section_id = $this->request->getQuery('section_id'); 
 
       $conditions['section_id'] = " AND StudentEnrolledCourse.section_id = $section_id";
 
 
     }
 
-    $this->loadModel('Report');
+    $this->loadModel('Reports');
     
-    $tmpData = $this->Report->query($this->Report->getAllEnrollmentProfile($conditions));
+    $tmpData = $this->Reports->getAllEnrollmentProfilePrint($conditions);
 
     $full_name = $this->Auth->user('first_name').' '.$this->Auth->user('last_name');
 
@@ -29028,7 +29110,7 @@ EQUIVALENT',1,'C',0);
     $pdf->SetWidths(array(10,50,100,60,60,65));
     $pdf->SetAligns(array('C','C','C','C','C','C'));
 
-    if (!empty($tmpData)) {
+    if (count($tmpData)>0) {
 
       foreach ($tmpData as $key => $data) {
     
@@ -29036,15 +29118,15 @@ EQUIVALENT',1,'C',0);
 
           $key + 1,
 
-          $data['Report']['student_no'],
+          $data['student_no'],
 
-          $data['Report']['full_name'],
+          $data['full_name'],
 
-          $data['Report']['course'],
+          $data['course'],
 
-          $data['Report']['section'],
+          $data['section'],
 
-          $data['Report']['email'],
+          $data['email'],
 
         ));
 

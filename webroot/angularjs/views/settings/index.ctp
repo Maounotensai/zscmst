@@ -20,7 +20,7 @@
 									<td class="text-left uppercase">{{ data.name }}</td>
 									<td class="text-left uppercase">
 										<span ng-hide="editmode">{{ data.value }}</span>
-										<input type="text" class="form-control input-sm" ng-show="editmode" ng-model="data.Setting.value" />
+										<input type="text" class="form-control input-sm" ng-show="editmode" ng-model="data.value" />
 									</td>
 									<td>
 										<div class="btn-group btn-group-xs">
@@ -28,7 +28,7 @@
 												<button type="submit" ng-hide="editmode" ng-click="editmode = true" class="btn btn-primary  btn-xs no-border-radius" title="EDIT VALUE"><i class="fa fa-pencil"></i></button>
 											</span>
 			                <span> 
-			                	<button type="submit" ng-show="editmode" ng-click="editmode = false; updateValue(data.Setting)" title="SAVE VALUE" class="btn btn-success no-border-radius btn-xs"><i class="fa fa-check"></i></button>
+			                	<button type="submit" ng-show="editmode" ng-click="editmode = false; updateValue(data)" title="SAVE VALUE" class="btn btn-success no-border-radius btn-xs"><i class="fa fa-check"></i></button>
 			                </span>	
 										</div>
 									</td>

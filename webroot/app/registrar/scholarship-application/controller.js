@@ -587,7 +587,7 @@ app.controller("ScholarshipApplicationAddController", function ($scope, Scholars
 
           });
 
-          window.location = "#/registrar/scholarship-application";
+          window.location = "#/admission/scholarship-application";
 
         } else {
           
@@ -654,7 +654,7 @@ app.controller("ScholarshipApplicationViewController", function ($scope, $routeP
 
             });
 
-            window.location = "#/registrar/scholarship-application";
+            window.location = "#/admission/scholarship-application";
 
           }
 
@@ -859,7 +859,7 @@ app.controller("ScholarshipApplicationEditController", function ($scope, $routeP
 
           });
 
-          window.location = "#/registrar/scholarship-application";
+          window.location = "#/admission/scholarship-application";
 
         } else {
 
@@ -1193,6 +1193,8 @@ app.controller("AdminScholarshipApplicationController", function ($scope, Schola
   };
 
   $scope.viewGrade = function (id) {
+
+    
     ScholarshipApplicationViewGrade.get({id:id}, function(e){
       // console.log(e.data.grade);
 
@@ -1229,7 +1231,7 @@ app.controller("AdminScholarshipApplicationController", function ($scope, Schola
             $("#view-grade").modal("hide");
           }
 
-          window.location = "#/registrar/admin-scholarship-application";
+          window.location = "#/ad/admin-scholarship-application";
 
         });
 
@@ -1321,7 +1323,7 @@ app.controller("AdminScholarshipApplicationController", function ($scope, Schola
 
     }
 
-  }
+  }mission
 
 });
 
@@ -1549,7 +1551,7 @@ app.controller("AdminScholarshipApplicationAddController", function ($scope, Sch
 
           });
 
-          window.location = "#/registrar/admin-scholarship-application";
+          window.location = "#/admission/admin-scholarship-application";
 
         } else {
           
@@ -1619,7 +1621,7 @@ app.controller("AdminScholarshipApplicationViewController", function ($scope, $r
 
           }
 
-          window.location = "#/registrar/admin-scholarship-application";
+          window.location = "#/admission/admin-scholarship-application";
 
         });
 
@@ -1651,7 +1653,7 @@ app.controller("AdminScholarshipApplicationViewController", function ($scope, $r
 
           }
 
-          window.location = "#/registrar/admin-scholarship-application";
+          window.location = "#/admission/admin-scholarship-application";
 
         });
 
@@ -1691,7 +1693,7 @@ app.controller("AdminScholarshipApplicationViewController", function ($scope, $r
 
                 $scope.load();
 
-                window.location = "#/registrar/admin-scholarship-application";
+                window.location = "#/admission/admin-scholarship-application";
 
               }
 
@@ -1726,7 +1728,7 @@ app.controller("AdminScholarshipApplicationViewController", function ($scope, $r
 
             });
 
-            window.location = "#/registrar/admin-scholarship-application";
+            window.location = "#/admission/admin-scholarship-application";
 
           }
 
@@ -1985,7 +1987,7 @@ app.controller("AdminScholarshipApplicationEditController", function ($scope, $r
 
           });
 
-          window.location = "#/registrar/admin-scholarship-application";
+          window.location = "#/admission/admin-scholarship-application";
 
         } else {
 

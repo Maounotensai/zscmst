@@ -613,7 +613,7 @@
                     <?php endif ?>
                     <?php if (hasAccess('report admission/list of scholars', $currentUser)): ?>
                       <li class="nav-link-side nav-list-scholar-students">
-                        <a href="#/reports/admission/list-scholar-students" onclick="change('list-scholar-students')"> List of Scholars </a>
+                        <a href="#/reports/admission/list-of-applicants" onclick="change('list-scholar-students')"> List of Scholars </a>
                       </li>
                     <?php endif ?>
                     </ul>

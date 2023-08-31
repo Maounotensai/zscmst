@@ -4,15 +4,16 @@ app.config(function($routeProvider) {
 
   .when('/admission/cat', {
 
-    templateUrl: tmp + 'admission__cat__index',
+    templateUrl: 'angularjs/views/admission/cat/index.ctp',
 
     controller: 'CatController',
 
   })
 
   .when("/admission/cat/view/:id", {
- 
-    templateUrl: tmp + "admission__cat__view",
+
+
+    templateUrl: 'angularjs/views/admission/cat/view.ctp',
  
     controller: "CatViewController",
  

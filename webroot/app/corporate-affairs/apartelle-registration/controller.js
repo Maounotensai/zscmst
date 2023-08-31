@@ -450,9 +450,9 @@ app.controller('ApartelleRegistrationAddController', function($scope, ApartelleR
 
   }
 
-      Select.get({code: 'program-list'}, function(e) {
+  Select.get({code: 'college-program-list-all'}, function(e) {
 
-    $scope.course = e.data;
+    $scope.college_program = e.data;
 
   });
 
@@ -1157,9 +1157,9 @@ app.controller('AdminApartelleRegistrationAddController', function($scope, Apart
 
   }
 
-    Select.get({code: 'program-list'}, function(e) {
+  Select.get({code: 'college-program-list-all'}, function(e) {
 
-    $scope.course = e.data;
+    $scope.college_program = e.data;
 
   });
 
@@ -1457,9 +1457,9 @@ app.controller('AdminApartelleRegistrationEditController', function($scope, $rou
 
   }
 
-      Select.get({code: 'program-list'}, function(e) {
+  Select.get({code: 'college-program-list-all'}, function(e) {
 
-    $scope.course = e.data;
+    $scope.college_program = e.data;
 
   });
 

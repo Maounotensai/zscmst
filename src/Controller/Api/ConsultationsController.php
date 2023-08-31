@@ -85,13 +85,13 @@ class ConsultationsController extends AppController {
 
     $conditions['studentId'] = '';
 
-    if ($this->request->getQuery('per_student') != null) {
+    if ($this->request->getQuery('per_student')) {
 
       $per_student = $this->request->getQuery('per_student');
 
-      $employee_id = $this->Session->read('Auth.User.studentId');
+      $employee_id = $this->Auth->user('studentId');
 
-      if (!empty($employee_id)) {
+      if ($employee_id!='') {
 
         $conditions['studentId'] = "AND Consultation.student_id = $employee_id";
 
@@ -150,6 +150,8 @@ class ConsultationsController extends AppController {
       );
 
     }
+
+    // var_dump($conditions);
 
     $response = [
 
@@ -273,7 +275,7 @@ class ConsultationsController extends AppController {
 
           'conditions' => ['ConsultationSubs.visible' => 1]
 
-        ]
+        ],
 
       ])
 

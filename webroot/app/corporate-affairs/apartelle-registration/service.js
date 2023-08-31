@@ -22,7 +22,7 @@
   
   $http.defaults.headers.common['X-CSRF-Token'] = csrfToken;
 
-  return $resource( api + "apartelle-registrations/approve/:id", { id: '@id' }, {
+  return $resource( api + "ApartelleRegistrations/approve/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -40,7 +40,7 @@
   
   $http.defaults.headers.common['X-CSRF-Token'] = csrfToken;
 
-  return $resource( api + "apartelle-registrations/disapprove/:id", { id: '@id' }, {
+  return $resource( api + "ApartelleRegistrations/disapprove/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 
@@ -58,7 +58,7 @@ app.factory("ApartelleRegistrationEmail", function($resource, $http) {
   
   $http.defaults.headers.common['X-CSRF-Token'] = csrfToken;
 
-  return $resource( api + "apartelle-registrations/email/:id", { id: '@id' }, {
+  return $resource( api + "ApartelleRegistrations/email/:id", { id: '@id' }, {
 
     query: { method: 'GET', isArray: false },
 

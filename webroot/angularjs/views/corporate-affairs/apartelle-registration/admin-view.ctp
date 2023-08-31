@@ -38,7 +38,7 @@
                 </tr>
                 <tr>
                   <th class="text-right"> COURSE : </th>
-                  <td class="italic">{{ data.Course.code }} - {{ data.Course.title }}</td>
+                  <td class="italic">{{ data.CollegeProgram.code }} - {{ data.CollegeProgram.name }}</td>
                 </tr>
                 <tr>
                   <th class="text-right"> APARTELLE/DORMITORY : </th>
