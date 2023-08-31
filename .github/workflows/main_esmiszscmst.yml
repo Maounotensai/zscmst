@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy PHP app to Azure Web App - esmiszscmst
+name: Build and deploy PHP app to Azure Web App
 
 on:
   push:
@@ -29,7 +26,7 @@ jobs:
 
       - name: Run composer install if composer.json exists
         if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+        run: composer install --no-interaction --optimize-autoloader
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
@@ -41,9 +38,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Production'
+      name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+    
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v2
@@ -55,6 +52,6 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'esmiszscmst'
-          slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_752987C79C604F55ADE2FD6F65E262A4 }}
+          slot-name: 'production'
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_58e5a4b3f7a844718366b55a64d62fa4 }}
           package: .
