@@ -5,6 +5,8 @@
   <div class="card-body" style="padding: 10px">
     <br>
     <?php echo $this->Form->create(array(),array('url'=>array('controller'=>'Main', 'action'=>'login'), 'class'=>'', 'id'=>'', 'inputDefaults'=>array('label'=>false, 'div'=>false, 'class'=>'form-control' )))?>
+
+    <?= $this->Form->hidden('_csrfToken', ['value' => $this->request->getAttribute('csrfToken')]) ?>
       <div class="input-group">
         <span class="input-group-addon" style="color: black"><i class="fa fa-user"></i></span>
         <?php echo $this->Form->input('username', array('required'=>true, 'placeholder'=>'USERNAME', 'autofocus'=>true, 'class'=>'form-control input-form')) ?>

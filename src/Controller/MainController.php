@@ -33,6 +33,11 @@ class MainController extends AppController {
   public function initialize(): void {
 
     parent::initialize();
+    $this->loadComponent('Security');
+
+    $this->loadComponent('Security', [
+    'unlockedActions' => ['login'], // List of actions that don't require CSRF protection
+    ]);
 
     $this->loadComponent('Auth', [
 

@@ -49,6 +49,12 @@ class AppController extends Controller
     {
         parent::initialize();
 
+        $this->loadComponent('Security');
+
+        $this->loadComponent('Security', [
+          'unlockedActions' => ['login'], // List of actions that don't require CSRF protection
+        ]);
+
         $this->loadComponent('RequestHandler');
 
         $this->loadComponent('Flash');
